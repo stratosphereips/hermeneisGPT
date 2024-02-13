@@ -9,6 +9,9 @@ using Large Language Models.
 import argparse
 import logging
 import yaml
+from dotenv import dotenv_values
+from openai import OpenAI
+
 
 # Set up logging
 logger = logging.getLogger('hermeneis')
@@ -32,22 +35,32 @@ logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
 
+def set_key(env_path):
+    "Reads the OpenAI API key and sets it"
+
+    env = dotenv_values(env_path)
+    return env["OPENAI_API_KEY"]
+
+
 def load_and_parse_config(yaml_config_path):
+    """
+    Takes a config yaml and loads it to a variable for later use.
+    """
     try:
         with open(yaml_config_path, 'r', encoding="utf-8") as configuration_yaml:
             yaml_config = yaml.safe_load(configuration_yaml)
-        logger.info("Loaded data from YAML file: %s", yaml_config_path)
+        logger.debug("Loaded data from YAML file: %s", yaml_config_path)
     except Exception as e:
         logger.error("Error reading YAML file: %s", e)
         raise
 
     config = {
-        'type': yaml_config['personality']['type'],
-        'prompt': yaml_config['personality']['prompt'],
-        'model': yaml_config['personality']['model'],
-        'temperature': yaml_config['personality']['temperature'],
-        'max_tokens': yaml_config['personality']['max_tokens'],
-        'log': yaml_config['personality']['log']
+        'system': yaml_config['personality']['system'].strip(),
+        'user': yaml_config['personality']['user'],
+        'model': yaml_config['personality']['model'].strip(),
+        'temperature': float(yaml_config['personality']['temperature'].strip()),
+        'max_tokens': int(yaml_config['personality']['max_tokens'].strip()),
+        'log': yaml_config['personality']['log'].strip()
     }
 
     return config
@@ -68,21 +81,39 @@ def main():
                         'Russian to English using LLMs.')
         parser.add_argument('-c',
                             '--yaml_config',
-                            required=True,
+                            default='config_EXAMPLE.yml',
                             help='Path to the YAML file with challenge data')
         parser.add_argument('-e',
                             '--env',
-                            required=True,
+                            default='.env',
                             help='Path to environment file (.env)')
         args = parser.parse_args()
 
         # Read YAML Configuration file
         config = load_and_parse_config(args.yaml_config)
 
-        # TODO Add main logic here
+        # Set the API key
+        OPENAI_KEY = set_key(args.env)
+        client = OpenAI(api_key=OPENAI_KEY)
+
+        print("Input your message to translate:")
+        input_lang_ru=input().strip()
+
+        translate_messages = [{"role":"system", "content": config['system']},
+                              {"role":"user", "content": config['user']+input_lang_ru}]
+
+        # Initialize the OpenAI LLM (Language Learning Model)
+        llm_response = client.chat.completions.create(
+            model = config['model'],
+            messages = translate_messages,
+            max_tokens = config['max_tokens'],
+            temperature = config['temperature'],
+        )
+        print(llm_response.choices[0].message.content)
 
     except Exception as err:
         logger.info("Exception in main()")
+        logger.info(err)
 
 
 if __name__ == "__main__":
