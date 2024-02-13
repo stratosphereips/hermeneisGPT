@@ -47,7 +47,7 @@ def load_and_parse_config(yaml_config_path):
     try:
         with open(yaml_config_path, 'r', encoding="utf-8") as configuration_yaml:
             yaml_config = yaml.safe_load(configuration_yaml)
-        logger.info("Loaded data from YAML file: %s", yaml_config_path)
+        logger.debug("Loaded data from YAML file: %s", yaml_config_path)
     except Exception as e:
         logger.error("Error reading YAML file: %s", e)
         raise
