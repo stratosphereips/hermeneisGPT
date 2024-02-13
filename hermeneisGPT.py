@@ -99,6 +99,9 @@ def main():
         print("Input your message to translate:")
         input_lang_ru=input().strip()
 
+        translate_messages = [{"role":"system", "content": config['system']},
+                              {"role":"user", "content": config['user']+input_lang_ru}]
+
 
     except Exception as err:
         logger.info("Exception in main()")
