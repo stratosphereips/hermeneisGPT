@@ -71,11 +71,11 @@ def main():
                         'Russian to English using LLMs.')
         parser.add_argument('-c',
                             '--yaml_config',
-                            required=True,
+                            default='config_EXAMPLE.yml',
                             help='Path to the YAML file with challenge data')
         parser.add_argument('-e',
                             '--env',
-                            required=True,
+                            default='.env',
                             help='Path to environment file (.env)')
         args = parser.parse_args()
 
