@@ -10,6 +10,8 @@ import argparse
 import logging
 import yaml
 from dotenv import dotenv_values
+from openai import OpenAI
+
 
 # Set up logging
 logger = logging.getLogger('hermeneis')
