@@ -96,7 +96,9 @@ def main():
         OPENAI_KEY = set_key(args.env)
         client = OpenAI(api_key=OPENAI_KEY)
 
-        # TODO Add main logic here
+        print("Input your message to translate:")
+        input_lang_ru=input().strip()
+
 
     except Exception as err:
         logger.info("Exception in main()")
