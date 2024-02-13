@@ -32,6 +32,26 @@ logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
 
+def load_and_parse_config(yaml_config_path):
+    try:
+        with open(yaml_config_path, 'r', encoding="utf-8") as configuration_yaml:
+            yaml_config = yaml.safe_load(configuration_yaml)
+        logger.info("Loaded data from YAML file: %s", yaml_config_path)
+    except Exception as e:
+        logger.error("Error reading YAML file: %s", e)
+        raise
+
+    config = {
+        'type': yaml_config['personality']['type'],
+        'prompt': yaml_config['personality']['prompt'],
+        'model': yaml_config['personality']['model'],
+        'temperature': yaml_config['personality']['temperature'],
+        'max_tokens': yaml_config['personality']['max_tokens'],
+        'log': yaml_config['personality']['log']
+    }
+
+    return config
+
 def main():
     """
     Take a message input and use the data from the yaml file to translate
@@ -57,21 +77,7 @@ def main():
         args = parser.parse_args()
 
         # Read YAML Configuration file
-        try:
-            with open(args.yaml_config, 'r', encoding="utf-8") as configuration_yaml:
-                yaml_config = yaml.safe_load(configuration_yaml)
-            logger.info("Loaded data from YAML file: %s", args.yaml_config)
-        except Exception as e:
-            logger.error("Error reading YAML file: %s", e)
-            raise
-
-        # Parse configuration parameters
-        config_type = yaml_config['personality']['type']
-        config_prompt = yaml_config['personality']['prompt']
-        config_model = yaml_config['personality']['model']
-        config_temp = yaml_config['personality']['temperature']
-        config_max_tokens = yaml_config['personality']['max_tokens']
-        config_log = yaml_config['personality']['log']
+        config = load_and_parse_config(args.yaml_config)
 
         # TODO Add main logic here
 
