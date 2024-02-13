@@ -33,6 +33,9 @@ logger.addHandler(console_handler)
 
 
 def load_and_parse_config(yaml_config_path):
+    """
+    Takes a config yaml and loads it to a variable for later use.
+    """
     try:
         with open(yaml_config_path, 'r', encoding="utf-8") as configuration_yaml:
             yaml_config = yaml.safe_load(configuration_yaml)
