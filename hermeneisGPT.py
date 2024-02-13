@@ -93,7 +93,8 @@ def main():
         config = load_and_parse_config(args.yaml_config)
 
         # Set the API key
-        OpenAI_key = set_key(args.env)
+        OPENAI_KEY = set_key(args.env)
+        client = OpenAI(api_key=OPENAI_KEY)
 
         # TODO Add main logic here
 
