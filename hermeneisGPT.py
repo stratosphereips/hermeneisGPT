@@ -60,18 +60,18 @@ def main():
         try:
             with open(args.yaml_config, 'r', encoding="utf-8") as configuration_yaml:
                 yaml_config = yaml.safe_load(configuration_yaml)
-            logger.info("Loaded data from YAML file: %s", args.yaml_file)
+            logger.info("Loaded data from YAML file: %s", args.yaml_config)
         except Exception as e:
             logger.error("Error reading YAML file: %s", e)
             raise
 
         # Parse configuration parameters
-        config_type = yaml_config['type']
-        config_prompt = yaml_config['prompt']
-        config_model = yaml_config['model']
-        config_temp = yaml_config['temperature']
-        config_max_tokens = yaml_config['max_tokens']
-        config_log = yaml_config['log']
+        config_type = yaml_config['personality']['type']
+        config_prompt = yaml_config['personality']['prompt']
+        config_model = yaml_config['personality']['model']
+        config_temp = yaml_config['personality']['temperature']
+        config_max_tokens = yaml_config['personality']['max_tokens']
+        config_log = yaml_config['personality']['log']
 
         # TODO Add main logic here
 
