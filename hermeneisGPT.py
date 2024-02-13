@@ -9,6 +9,8 @@ using Large Language Models.
 import argparse
 import logging
 import yaml
+from dotenv import dotenv_values
+import openai
 
 # Set up logging
 logger = logging.getLogger('hermeneis')
@@ -30,6 +32,13 @@ console_handler.setFormatter(formatter)
 # Add the handlers to the logger
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
+
+
+def set_key(env_path):
+    "Reads the OpenAI API key and sets it"
+
+    env = dotenv_values(env_path)
+    openai.api_key = env["OPENAI_API_KEY"]
 
 
 def load_and_parse_config(yaml_config_path):
@@ -81,6 +90,9 @@ def main():
 
         # Read YAML Configuration file
         config = load_and_parse_config(args.yaml_config)
+
+        # Set the API key
+        set_key(args.env)
 
         # TODO Add main logic here
 
