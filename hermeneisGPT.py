@@ -113,6 +113,7 @@ def main():
 
     except Exception as err:
         logger.info("Exception in main()")
+        logger.info(err)
 
 
 if __name__ == "__main__":
