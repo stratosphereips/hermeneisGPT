@@ -53,12 +53,12 @@ def load_and_parse_config(yaml_config_path):
         raise
 
     config = {
-        'type': yaml_config['personality']['type'],
-        'prompt': yaml_config['personality']['prompt'],
-        'model': yaml_config['personality']['model'],
-        'temperature': yaml_config['personality']['temperature'],
-        'max_tokens': yaml_config['personality']['max_tokens'],
-        'log': yaml_config['personality']['log']
+        'system': yaml_config['personality']['system'].strip(),
+        'user': yaml_config['personality']['user'],
+        'model': yaml_config['personality']['model'].strip(),
+        'temperature': float(yaml_config['personality']['temperature'].strip()),
+        'max_tokens': int(yaml_config['personality']['max_tokens'].strip()),
+        'log': yaml_config['personality']['log'].strip()
     }
 
     return config
