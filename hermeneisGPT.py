@@ -10,7 +10,6 @@ import argparse
 import logging
 import yaml
 from dotenv import dotenv_values
-import openai
 
 # Set up logging
 logger = logging.getLogger('hermeneis')
@@ -38,7 +37,7 @@ def set_key(env_path):
     "Reads the OpenAI API key and sets it"
 
     env = dotenv_values(env_path)
-    openai.api_key = env["OPENAI_API_KEY"]
+    return env["OPENAI_API_KEY"]
 
 
 def load_and_parse_config(yaml_config_path):
@@ -92,7 +91,7 @@ def main():
         config = load_and_parse_config(args.yaml_config)
 
         # Set the API key
-        set_key(args.env)
+        OpenAI_key = set_key(args.env)
 
         # TODO Add main logic here
 
