@@ -82,6 +82,8 @@ def test_has_channel_messages_false(setup_database):
 
 
 def test_has_channel_messages_nonexistent_channel(setup_database):
-    """Test that has_channel_messages returns False for a nonexistent channel."""
+    """
+    Test that has_channel_messages returns False for a nonexistent channel.
+    """
     cursor = setup_database
     assert has_channel_messages(cursor, 'nonexistent_channel') is False
