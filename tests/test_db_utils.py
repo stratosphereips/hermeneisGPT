@@ -67,3 +67,21 @@ def test_channel_does_not_exist(setup_database):
     """
     cursor = setup_database
     assert check_channel_exists(cursor, 'nonexistent_channel') is None
+
+
+def test_has_channel_messages_true(setup_database):
+    """Test that has_channel_messages returns True when messages exist."""
+    cursor = setup_database
+    assert has_channel_messages(cursor, 'existing_channel') is True
+
+
+def test_has_channel_messages_false(setup_database):
+    """Test that has_channel_messages returns False when no messages exist."""
+    cursor = setup_database
+    assert has_channel_messages(cursor, 'empty_channel') is False
+
+
+def test_has_channel_messages_nonexistent_channel(setup_database):
+    """Test that has_channel_messages returns False for a nonexistent channel."""
+    cursor = setup_database
+    assert has_channel_messages(cursor, 'nonexistent_channel') is False
