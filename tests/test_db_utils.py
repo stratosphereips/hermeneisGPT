@@ -1,4 +1,5 @@
 # pylint: disable=missing-docstring
+# pylint: disable=line-too-long
 import pytest
 import sys
 import sqlite3
