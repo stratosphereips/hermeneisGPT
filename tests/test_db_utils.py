@@ -21,3 +21,22 @@ def test_get_db_connection_failure():
     db_path = "/invalid/path/to/database.db"
     with pytest.raises(sqlite3.DatabaseError):
         get_db_connection(db_path)
+
+
+@pytest.fixture
+def setup_database():
+    # Use an in-memory database for testing
+    connection = sqlite3.connect(":memory:")
+    cursor = connection.cursor()
+
+    # Setup schema and test data
+    cursor.execute("CREATE TABLE channels (channel_id INTEGER PRIMARY KEY, channel_name TEXT)")
+    # Insert a test channel
+    cursor.execute("INSERT INTO channels (channel_name) VALUES ('test_channel')")
+
+    yield cursor
+
+    # Teardown - close the connection
+    connection.close()
+
+
