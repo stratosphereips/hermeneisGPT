@@ -49,3 +49,12 @@ def test_channel_exists(setup_database):
     cursor = setup_database
     # We inserted one channel, so channel_id =1
     assert check_channel_exists(cursor, 'test_channel') == 1
+
+
+def test_channel_does_not_exist(setup_database):
+    """
+    Test that check_channel_exists returns None when the
+    channel does not exist.
+    """
+    cursor = setup_database
+    assert check_channel_exists(cursor, 'nonexistent_channel') is None
