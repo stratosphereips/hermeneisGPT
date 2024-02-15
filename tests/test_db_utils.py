@@ -28,18 +28,23 @@ def test_get_db_connection_failure():
 
 @pytest.fixture
 def setup_database():
-    # Use an in-memory database for testing
+    """Setup an in-memory database and return a cursor."""
     connection = sqlite3.connect(":memory:")
     cursor = connection.cursor()
 
-    # Setup schema and test data
-    cursor.execute("CREATE TABLE channels (channel_id INTEGER PRIMARY KEY, channel_name TEXT)")
-    # Insert a test channel
+    # Create the schema
+    cursor.execute("CREATE TABLE channels (channel_id INTEGER PRIMARY KEY, channel_name TEXT UNIQUE)")
+    cursor.execute("CREATE TABLE messages (message_id INTEGER PRIMARY KEY, channel_id INTEGER, message TEXT)")
+
+    # Insert test data
     cursor.execute("INSERT INTO channels (channel_name) VALUES ('test_channel')")
+    cursor.execute("INSERT INTO channels (channel_name) VALUES ('existing_channel')")
+    cursor.execute("INSERT INTO channels (channel_name) VALUES ('empty_channel')")
+    channel_id = cursor.execute("SELECT channel_id FROM channels WHERE channel_name = 'existing_channel'").fetchone()[0]
+    cursor.execute("INSERT INTO messages (channel_id, message) VALUES (?, 'Test message')", (channel_id,))
 
     yield cursor
 
-    # Teardown - close the connection
     connection.close()
 
 
