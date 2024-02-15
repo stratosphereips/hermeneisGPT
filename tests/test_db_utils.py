@@ -7,6 +7,7 @@ from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from lib.db_utils import get_db_connection
 from lib.db_utils import check_channel_exists
+from lib.db_utils import has_channel_messages
 
 
 def test_get_db_connection_success():
