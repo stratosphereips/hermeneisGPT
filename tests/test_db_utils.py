@@ -87,3 +87,28 @@ def test_has_channel_messages_nonexistent_channel(setup_database):
     """
     cursor = setup_database
     assert has_channel_messages(cursor, 'nonexistent_channel') is False
+
+
+def test_schema_validity():
+    # Connect to an in-memory SQLite database
+    conn = sqlite3.connect(':memory:')
+    cursor = conn.cursor()
+
+    # Schema location assets/schema.sql
+    schema_file_path = 'assets/schema.sql'
+
+    # Read and execute the schema SQL
+    with open(schema_file_path, 'r') as schema_file:
+        schema_sql = schema_file.read()
+        cursor.executescript(schema_sql)
+
+    # Verify tables were created correctly
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    tables = cursor.fetchall()
+    assert ('translation_parameters',) in tables
+    assert ('message_translation',) in tables
+
+    # Verify foreign key constraints
+    cursor.execute("PRAGMA foreign_key_list('message_translation')")
+    fks = cursor.fetchall()
+    assert len(fks) > 0, "Foreign key constraints not found"
