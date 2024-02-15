@@ -54,8 +54,10 @@ def test_channel_exists(setup_database):
     channel_id when the channel exists.
     """
     cursor = setup_database
-    # We inserted one channel, so channel_id =1
-    assert check_channel_exists(cursor, 'test_channel') == 1
+    cursor.execute("SELECT channel_id FROM channels WHERE channel_name = ?", ('test_channel',))
+    expected_channel_id = cursor.fetchone()
+    actual_channel_id = check_channel_exists(cursor, 'test_channel')
+    assert actual_channel_id == expected_channel_id[0]
 
 
 def test_channel_does_not_exist(setup_database):
