@@ -61,3 +61,41 @@ def check_channel_exists(cursor, channel_name):
         raise sqlite3.ProgrammingError(e)
     except sqlite3.DatabaseError as e:
         raise sqlite3.DatabaseError(e)
+
+
+def has_channel_messages(cursor, channel_name):
+    """
+    Check if there are any messages for the given channel.
+
+    Args:
+    cursor (sqlite3.Cursor)
+    channel_name (str)
+
+    Returns:
+    bool
+
+    Raises:
+    sqlite3 errors
+    """
+    try:
+        channel_id = check_channel_exists(cursor, channel_name)
+
+        if channel_id is None:
+            return False
+
+        query = "SELECT count(*) FROM messages WHERE channel_id= ?"
+        cursor.execute(query, (channel_id,))
+        result = cursor.fetchone()
+
+        if result and result[0] > 0:
+            return True
+        else:
+            return False
+    except sqlite3.OperationalError as e:
+        raise sqlite3.OperationalError(e)
+    except sqlite3.IntegrityError as e:
+        raise sqlite3.IntegrityError(e)
+    except sqlite3.ProgrammingError as e:
+        raise sqlite3.ProgrammingError(e)
+    except sqlite3.DatabaseError as e:
+        raise sqlite3.DatabaseError(e)
