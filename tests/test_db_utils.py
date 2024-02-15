@@ -5,6 +5,7 @@ import sqlite3
 from os import path
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from lib.db_utils import get_db_connection
+from lib.db_utils import check_channel_exists
 
 
 def test_get_db_connection_success():
@@ -40,3 +41,11 @@ def setup_database():
     connection.close()
 
 
+def test_channel_exists(setup_database):
+    """
+    Test that check_channel_exists returns the correct
+    channel_id when the channel exists.
+    """
+    cursor = setup_database
+    # We inserted one channel, so channel_id =1
+    assert check_channel_exists(cursor, 'test_channel') == 1
