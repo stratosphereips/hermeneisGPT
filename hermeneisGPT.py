@@ -107,8 +107,7 @@ def main():
                             '--yaml_config',
                             default='config_EXAMPLE.yml',
                             help='Path to the YAML file with challenge data')
-        parser.add_argument('-d',
-                            '--sqlite_db',
+        parser.add_argument('--sqlite_db',
                             help='Path to environment file (.env)')
         parser.add_argument('-e',
                             '--env',
