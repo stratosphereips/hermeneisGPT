@@ -120,3 +120,11 @@ def check_table_exists(cursor, table_name):
         raise sqlite3.OperationalError(e)
 
 
+def read_sql_from_file(file_path):
+    """
+    Read SQL commands from a file.
+    """
+    with open(file_path, 'r') as sql_file:
+        return sql_file.read()
+
+
