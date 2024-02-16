@@ -125,8 +125,8 @@ def main():
         config = load_and_parse_config(args.yaml_config)
 
         # Set the API key
-        OPENAI_KEY = set_key(args.env)
-        client = OpenAI(api_key=OPENAI_KEY)
+        openai_key = set_key(args.env)
+        client = OpenAI(api_key=openai_key)
 
         # Match the mode to run on
         match args.mode:
