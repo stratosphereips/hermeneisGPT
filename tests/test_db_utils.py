@@ -13,6 +13,7 @@ from lib.db_utils import has_channel_messages
 from lib.db_utils import check_table_exists
 from lib.db_utils import read_sql_from_file
 from lib.db_utils import create_tables_from_schema
+from lib.db_utils import insert_translation_parameters
 
 
 def test_get_db_connection_success():
@@ -170,3 +171,51 @@ def test_create_tables_from_schema(setup_database):
         # Clean up - remove the temporary file and close the database connection
         remove(tmpfile_name)
         connection.close()
+
+
+@pytest.fixture
+def db_cursor():
+    # Create an in-memory SQLite database and cursor
+    connection = sqlite3.connect(":memory:")
+    cursor = connection.cursor()
+    # Create the table needed for the test
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS translation_parameters (
+        translation_parameters_id   INTEGER PRIMARY KEY,
+        translation_tool_name       TEXT,
+        translation_tool_commit     TEXT,
+        translation_model           TEXT,
+        translation_config_sha256   TEXT,
+        translation_config          TEXT
+    )
+    """)
+    yield cursor
+    # No need to close the connection for in-memory databases as they are discarded
+
+
+def test_insert_translation_parameters(db_cursor):
+    # Example data to insert
+    translation_tool_name = "hermeneisGPT.py"
+    translation_tool_commit = "da8fb669caef4a111b80b365a6966c34bd48021c"
+    translation_model = "gpt-3.5-turbo-1106"
+    translation_config_sha256 = "6834cfe6d13e0e8bbddc21a30a84a6bf7de7dbb6f6624947dd0a51a9684c69cf"
+    translation_config = """
+    personality:
+    system: |
+      You are a Language Translator Bot specialized in translating from Russian to English.
+    """
+
+    # Insert data into the database
+    last_row_id = insert_translation_parameters(db_cursor, translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config)
+
+    # Query the database to verify the insertion
+    db_cursor.execute("SELECT * FROM translation_parameters WHERE translation_parameters_id=?", (last_row_id,))
+
+    result = db_cursor.fetchone()
+
+    assert result is not None, "The data was not inserted into the database."
+    assert result[1] == translation_tool_name
+    assert result[2] == translation_tool_commit
+    assert result[3] == translation_model
+    assert result[4] == translation_config_sha256
+    assert result[5] == translation_config
