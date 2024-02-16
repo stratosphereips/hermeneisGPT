@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS translation_parameters (
     translation_tool_commit     TEXT,
     translation_model           TEXT,
     translation_config_sha256   TEXT,
-    translation_config          TEXT
+    translation_config          TEXT,
+    UNIQUE(translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config)
 );
 
 
