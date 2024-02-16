@@ -128,3 +128,19 @@ def read_sql_from_file(file_path):
         return sql_file.read()
 
 
+def create_tables_from_schema(connection, cursor, schema_file_path):
+    """
+    Create tables from a schema file. Assumes 'if not exist'
+    intruction in the sql schema.
+
+    Parameters:
+    cursor
+    schema_file_path
+    """
+    schema_sql = read_sql_from_file(schema_file_path)
+    try:
+        cursor.executescript(schema_sql)
+        connection.commit()
+    except sqlite3.OperationalError as e:
+        connection.rollback()
+        raise sqlite3.OperationalError(e)
