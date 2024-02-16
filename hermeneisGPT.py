@@ -23,7 +23,7 @@ file_handler.setLevel(logging.DEBUG)  # Log all levels to the file
 
 # Create console handler for logging to the console
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)  # Log INFO and above to the console
+console_handler.setLevel(logging.ERROR)  # Log INFO and above to the console
 
 # Create formatter and add it to the handlers
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
