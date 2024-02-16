@@ -162,8 +162,8 @@ def insert_translation_parameters(cursor, translation_tool_name, translation_too
     lastrowid
     """
     insert_query = """
-    INSERT INTO translation_parameters 
-    (translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config) 
+    INSERT OR IGNORE INTO translation_parameters
+    (translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config)
     VALUES (?, ?, ?, ?, ?)
     """
     try:
