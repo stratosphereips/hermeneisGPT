@@ -66,6 +66,16 @@ def load_and_parse_config(yaml_config_path):
     return config
 
 
+def translate_mode_automatic(client, config, args):
+    """
+    Run the LLM translation in automatic mode using a
+    SQLite database. Translations will be written on
+    the same DB.
+    """
+    try:
+        logger.debug("Starting automatic translation")
+    except KeyboardInterrupt:
+        return
 def translate_mode_manual(client, config):
     """
     Run the LLM translation in manual interactive mode
