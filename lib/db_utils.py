@@ -95,3 +95,27 @@ def has_channel_messages(cursor, channel_name):
         raise sqlite3.ProgrammingError(e)
     except sqlite3.DatabaseError as e:
         raise sqlite3.DatabaseError(e)
+
+
+def check_table_exists(cursor, table_name):
+    """
+    Check a table exists in the SQLite database.
+
+    Parameters:
+    cursor
+    table_name
+
+    Returns:
+    bool
+
+    Raises:
+    sqlite3.OperationalError
+    """
+    try:
+        cursor.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+
+        # fetchone() returns a tuple (n, ) where n is 0 if the table does not exist, and 1 if it does.
+        return bool(cursor.fetchone()[0] == 1)
+    except sqlite3.OperationalError as e:
+        print(f"An error occurred: {e}")
+        raise
