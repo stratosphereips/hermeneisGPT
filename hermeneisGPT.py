@@ -125,20 +125,8 @@ def main():
         OPENAI_KEY = set_key(args.env)
         client = OpenAI(api_key=OPENAI_KEY)
 
-        print("Input your message to translate:")
-        input_lang_ru=input().strip()
 
-        translate_messages = [{"role":"system", "content": config['system']},
-                              {"role":"user", "content": config['user']+input_lang_ru}]
 
-        # Initialize the OpenAI LLM (Language Learning Model)
-        llm_response = client.chat.completions.create(
-            model = config['model'],
-            messages = translate_messages,
-            max_tokens = config['max_tokens'],
-            temperature = config['temperature'],
-        )
-        print(llm_response.choices[0].message.content)
 
     except Exception as err:
         logger.info("Exception in main()")
