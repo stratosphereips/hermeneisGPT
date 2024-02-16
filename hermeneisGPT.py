@@ -17,6 +17,7 @@ from lib.utils import get_file_sha256
 from lib.utils import get_file_content
 from lib.db_utils import get_db_connection
 from lib.db_utils import create_tables_from_schema
+from lib.db_utils import has_channel_messages
 
 
 # Set up logging
@@ -91,6 +92,9 @@ def translate_mode_automatic(client, config, args):
 
         logger.debug("Creating tables needed for translation using schema: %s", args.sqlite_schema)
         create_tables_from_schema(connection, cursor, args.sqlite_schema)
+
+        has_messages = has_channel_messages(cursor, args.channel_name)
+        logger.debug("Checking if there are messages for channel %s: %s", args.channel_name, has_messages),
 
         logger.debug("Retrieving translation parameters based on user input")
         logger.debug("Retrieving the tool name: %s", translation_tool_name)
