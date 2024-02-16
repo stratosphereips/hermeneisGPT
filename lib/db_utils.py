@@ -144,3 +144,32 @@ def create_tables_from_schema(connection, cursor, schema_file_path):
     except sqlite3.OperationalError as e:
         connection.rollback()
         raise sqlite3.OperationalError(e)
+
+
+def insert_translation_parameters(cursor, translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config):
+    """
+    Inserts a new entry into the translation_parameters table.
+
+    Parameters:
+    cursor
+    translation_tool_name
+    translation_tool_commit
+    translation_model
+    translation_config_sha256
+    translation_config
+
+    Returns:
+    lastrowid
+    """
+    insert_query = """
+    INSERT INTO translation_parameters 
+    (translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config) 
+    VALUES (?, ?, ?, ?, ?)
+    """
+    try:
+        cursor.execute(insert_query, (translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config))
+        return cursor.lastrowid
+    except sqlite3.IntegrityError as e:
+        raise sqlite3.IntegrityError(f"Integrity error inserting into database: {e}")
+    except sqlite3.OperationalError as e:
+        raise sqlite3.OperationalError(f"Operational error inserting into database: {e}")
