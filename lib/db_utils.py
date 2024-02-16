@@ -2,7 +2,6 @@
 HermeneisGPT library of functions to handle SQLite DB transactions.
 """
 
-import sys
 import sqlite3
 
 
@@ -87,10 +86,7 @@ def has_channel_messages(cursor, channel_name):
         cursor.execute(query, (channel_id,))
         result = cursor.fetchone()
 
-        if result and result[0] > 0:
-            return True
-        else:
-            return False
+        return bool(result) and result[0] > 0
     except sqlite3.OperationalError as e:
         raise sqlite3.OperationalError(e)
     except sqlite3.IntegrityError as e:
