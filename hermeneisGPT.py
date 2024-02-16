@@ -114,18 +114,37 @@ def main():
         parser.add_argument('-c',
                             '--yaml_config',
                             default='config_EXAMPLE.yml',
-                            help='Path to the YAML file with challenge data')
-        parser.add_argument('--sqlite_db',
-                            help='Path to environment file (.env)')
+                            help='path to the YAML file with challenge data (default=config_EXAMPLE.yml)')
         parser.add_argument('-e',
                             '--env',
                             default='.env',
-                            help='Path to environment file (.env)')
+                            help='path to environment file (.env)')
         parser.add_argument('-m',
                             '--mode',
                             choices=['manual', 'auto-sqlite'],
                             default='manual',
-                            help='Select the mode (manual or auto-sqlite)')
+                            help='select the mode (manual or auto-sqlite)')
+
+        parser.add_argument('--channel_name',
+                            help='name of the hacktivist telegram channel to translate')
+
+        parser.add_argument('--sqlite_db',
+                            help='path to SQLite database with messages to translate')
+        parser.add_argument('--sqlite_schema',
+                            default='assets/schema.sql',
+                            help='path to SQLite database schema for translations')
+        parser.add_argument('--sqlite_chn_table',
+                            default='channels',
+                            help='DB table where channels are stored (default="channels")')
+        parser.add_argument('--sqlite_chn_field',
+                            default='channel_name',
+                            help='field on channels table that contains name of the channel (default="channel_name")')
+        parser.add_argument('--sqlite_msg_table',
+                            default='messages',
+                            help='DB table where messages are stored (default="messages")')
+        parser.add_argument('--sqlite_msg_field',
+                            default='message_text',
+                            help='field on messages table that contains message text (default="message_text")')
         args = parser.parse_args()
 
         if args.verbose:
