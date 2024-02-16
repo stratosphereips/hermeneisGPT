@@ -144,6 +144,7 @@ def main():
         match args.mode:
             case "manual":
                 logger.info("hermeneisGPT on manual mode")
+
                 # If a DB is provided, make sure the user knows it will be ignored
                 if args.sqlite_db:
                     logger.info("Running on manual mode, ignoring the DB file '%s'", args.sqlite_db)
@@ -151,7 +152,16 @@ def main():
                 # Run interactive manual mode
                 translate_mode_manual(client, config)
 
+            case "auto-sqlite":
+                logger.info("hermeneisGPT on automatic SQLite mode")
 
+                # Automatic DB mode requires the database arg to be passes/
+                if not args.sqlite_db:
+                    logger.error("--sqlite_db is required when running on automatic SQLite mode")
+                    return
+
+                # Run automatic mode with sqlite db
+                # TODO
 
     except Exception as err:
         logger.info("Exception in main()")
