@@ -103,6 +103,14 @@ def main():
         parser = argparse.ArgumentParser(
             description='HermeneisGPT: Translate hacking messages from '
                         'Russian to English using LLMs.')
+        parser.add_argument('-v',
+                            '--verbose',
+                            action='store_true',
+                            help='run hermeneisGPT in verbose mode')
+        parser.add_argument('-d',
+                            '--debug',
+                            action='store_true',
+                            help='run hermeneisGPT in debug mode')
         parser.add_argument('-c',
                             '--yaml_config',
                             default='config_EXAMPLE.yml',
@@ -118,14 +126,6 @@ def main():
                             choices=['manual', 'auto-sqlite'],
                             default='manual',
                             help='Select the mode (manual or auto-sqlite)')
-        parser.add_argument('-v',
-                            '--verbose',
-                            action='store_true',
-                            help='Run hermeneisGPT in verbose mode')
-        parser.add_argument('-d',
-                            '--debug',
-                            action='store_true',
-                            help='Run hermeneisGPT in verbose mode')
         args = parser.parse_args()
 
         if args.verbose:
