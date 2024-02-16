@@ -30,3 +30,15 @@ def get_file_sha256(file_path):
     except FileNotFoundError:
         raise FileNotFoundError
 
+
+def get_file_content(file_path):
+    """
+    Read the content of a file and return it.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"File not found: {file_path}")
+    except PermissionError:
+        raise PermissionError(f"Permission denied: {file_path}")
