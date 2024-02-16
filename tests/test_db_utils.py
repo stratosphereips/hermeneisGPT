@@ -4,11 +4,14 @@ import pytest
 import sys
 import sqlite3
 from os import path
+import tempfile
+from os import remove
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from lib.db_utils import get_db_connection
 from lib.db_utils import check_channel_exists
 from lib.db_utils import has_channel_messages
 from lib.db_utils import check_table_exists
+from lib.db_utils import read_sql_from_file
 
 
 def test_get_db_connection_success():
@@ -123,3 +126,23 @@ def test_check_table_exists_true(setup_database):
 def test_check_table_exists_false(setup_database):
     cursor = setup_database
     assert check_table_exists(cursor, "non_existent_table") is False, "Should return False for non-existent table"
+
+
+def test_read_sql_from_file():
+    # Create a temporary file with known SQL content
+    expected_sql_content = "CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT);"
+    with tempfile.NamedTemporaryFile(delete=False, mode='w') as tmpfile:
+        tmpfile_name = tmpfile.name
+        tmpfile.write(expected_sql_content)
+        tmpfile.flush()  # Ensure content is written to disk
+
+    # Use the function to read back the file content
+    try:
+        actual_sql_content = read_sql_from_file(tmpfile_name)
+        # Assert that the content read matches what was written
+        assert actual_sql_content == expected_sql_content, "SQL content read does not match expected content"
+    finally:
+        # Clean up - remove the temporary file
+        remove(tmpfile_name)
+
+
