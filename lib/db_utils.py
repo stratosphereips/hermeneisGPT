@@ -168,7 +168,15 @@ def insert_translation_parameters(cursor, translation_tool_name, translation_too
     """
     try:
         cursor.execute(insert_query, (translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config))
-        return cursor.lastrowid
+        # Retrieve the ID of the existing or newly inserted row
+        select_query = """
+        SELECT translation_parameters_id FROM translation_parameters
+        WHERE translation_tool_name=? AND translation_tool_commit=? AND translation_model=? AND translation_config_sha256=? AND translation_config=?
+        """
+        cursor.execute(select_query, (translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config))
+        translation_parameters_id = cursor.fetchone()[0]
+
+        return translation_parameters_id
     except sqlite3.IntegrityError as e:
         raise sqlite3.IntegrityError(f"Integrity error inserting into database: {e}")
     except sqlite3.OperationalError as e:
