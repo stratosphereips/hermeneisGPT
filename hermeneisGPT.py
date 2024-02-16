@@ -16,6 +16,7 @@ from lib.utils import get_current_commit
 from lib.utils import get_file_sha256
 from lib.utils import get_file_content
 from lib.db_utils import get_db_connection
+from lib.db_utils import create_tables_from_schema
 
 
 # Set up logging
@@ -87,6 +88,9 @@ def translate_mode_automatic(client, config, args):
 
         logger.debug("Connecting to DB: %s", args.sqlite_db)
         connection, cursor = get_db_connection(args.sqlite_db)
+
+        logger.debug("Creating tables needed for translation using schema: %s", args.sqlite_schema)
+        create_tables_from_schema(connection, cursor, args.sqlite_schema)
 
         logger.debug("Retrieving translation parameters based on user input")
         logger.debug("Retrieving the tool name: %s", translation_tool_name)
