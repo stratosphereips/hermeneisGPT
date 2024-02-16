@@ -15,6 +15,7 @@ from openai import OpenAI
 from lib.utils import get_current_commit
 from lib.utils import get_file_sha256
 from lib.utils import get_file_content
+from lib.db_utils import get_db_connection
 
 
 # Set up logging
@@ -83,6 +84,10 @@ def translate_mode_automatic(client, config, args):
     translation_config = get_file_content(args.yaml_config)
     try:
         logger.debug("Starting automatic translation")
+
+        logger.debug("Connecting to DB: %s", args.sqlite_db)
+        connection, cursor = get_db_connection(args.sqlite_db)
+
         logger.debug("Retrieving translation parameters based on user input")
         logger.debug("Retrieving the tool name: %s", translation_tool_name)
         logger.debug("Retrieving the tool current commit: %s", translation_tool_commit)
