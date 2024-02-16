@@ -8,6 +8,7 @@ sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from lib.db_utils import get_db_connection
 from lib.db_utils import check_channel_exists
 from lib.db_utils import has_channel_messages
+from lib.db_utils import check_table_exists
 
 
 def test_get_db_connection_success():
@@ -112,3 +113,13 @@ def test_schema_validity():
     cursor.execute("PRAGMA foreign_key_list('message_translation')")
     fks = cursor.fetchall()
     assert len(fks) > 0, "Foreign key constraints not found"
+
+
+def test_check_table_exists_true(setup_database):
+    cursor = setup_database
+    assert check_table_exists(cursor, "channels") is True, "Should return True for existing table"
+
+
+def test_check_table_exists_false(setup_database):
+    cursor = setup_database
+    assert check_table_exists(cursor, "non_existent_table") is False, "Should return False for non-existent table"
