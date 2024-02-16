@@ -128,6 +128,16 @@ def main():
         OPENAI_KEY = set_key(args.env)
         client = OpenAI(api_key=OPENAI_KEY)
 
+        # Match the mode to run on
+        match args.mode:
+            case "manual":
+                logger.info("hermeneisGPT on manual mode")
+                # If a DB is provided, make sure the user knows it will be ignored
+                if args.sqlite_db:
+                    logger.info("Running on manual mode, ignoring the DB file '%s'", args.sqlite_db)
+
+                # Run interactive manual mode
+                translate_mode_manual(client, config)
 
 
 
