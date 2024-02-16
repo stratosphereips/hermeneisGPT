@@ -18,6 +18,7 @@ from lib.utils import get_file_content
 from lib.db_utils import get_db_connection
 from lib.db_utils import create_tables_from_schema
 from lib.db_utils import has_channel_messages
+from lib.db_utils import insert_translation_parameters
 
 
 # Set up logging
@@ -102,6 +103,15 @@ def translate_mode_automatic(client, config, args):
         logger.debug("Retrieving the LLM model: %s", translation_model)
         logger.debug("Retrieving the SHA256 of the YAML config file: %s", translation_config_sha256)
         logger.debug("Retrieving the content of the YAML config file: %s bytes", len(translation_config))
+
+        translation_parameter_id = insert_translation_parameters(cursor,
+                                                                 translation_tool_name,
+                                                                 translation_tool_commit,
+                                                                 translation_model,
+                                                                 translation_config_sha256,
+                                                                 translation_config)
+
+        logger.debug("Storing translation parameters to DB and retrieving ID: %s", translation_parameter_id)
         connection.commit()
         connection.close()
     except KeyboardInterrupt:
