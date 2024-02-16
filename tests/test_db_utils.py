@@ -12,6 +12,7 @@ from lib.db_utils import check_channel_exists
 from lib.db_utils import has_channel_messages
 from lib.db_utils import check_table_exists
 from lib.db_utils import read_sql_from_file
+from lib.db_utils import create_tables_from_schema
 
 
 def test_get_db_connection_success():
@@ -146,3 +147,26 @@ def test_read_sql_from_file():
         remove(tmpfile_name)
 
 
+def test_create_tables_from_schema(setup_database):
+    connection = sqlite3.connect(":memory:")
+    cursor = setup_database
+
+    # Create a temporary schema file
+    schema_content = """
+    CREATE TABLE IF NOT EXISTS new_table (id INTEGER PRIMARY KEY, name TEXT);
+    """
+    with tempfile.NamedTemporaryFile(delete=False, mode='w') as tmpfile:
+        tmpfile_name = tmpfile.name
+        tmpfile.write(schema_content)
+        tmpfile.flush()
+
+    try:
+        # Test the function
+        create_tables_from_schema(connection, cursor, tmpfile_name)
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='new_table'")
+        table_exists = cursor.fetchone()
+        assert table_exists is not None, "Table 'new_table' should have been created but was not found."
+    finally:
+        # Clean up - remove the temporary file and close the database connection
+        remove(tmpfile_name)
+        connection.close()
