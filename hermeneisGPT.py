@@ -178,6 +178,10 @@ def main():
                 if not args.sqlite_db:
                     logger.error("--sqlite_db is required when running on automatic SQLite mode")
                     return
+                # Automatic DB mode requires the hacktivist channel_name to translate messages from
+                if not args.channel_name:
+                    logger.error("--channel_name is required when running on automatic SQLite mode")
+                    return
 
                 # Run automatic mode with sqlite db
                 # TODO
