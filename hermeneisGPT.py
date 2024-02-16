@@ -102,8 +102,14 @@ def translate_mode_automatic(client, config, args):
         logger.debug("Retrieving the LLM model: %s", translation_model)
         logger.debug("Retrieving the SHA256 of the YAML config file: %s", translation_config_sha256)
         logger.debug("Retrieving the content of the YAML config file: %s bytes", len(translation_config))
+        connection.commit()
+        connection.close()
     except KeyboardInterrupt:
+        connection.commit()
+        connection.close()
         return
+
+
 def translate_mode_manual(client, config):
     """
     Run the LLM translation in manual interactive mode
