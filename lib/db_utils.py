@@ -117,5 +117,6 @@ def check_table_exists(cursor, table_name):
         # fetchone() returns a tuple (n, ) where n is 0 if the table does not exist, and 1 if it does.
         return bool(cursor.fetchone()[0] == 1)
     except sqlite3.OperationalError as e:
-        print(f"An error occurred: {e}")
-        raise
+        raise sqlite3.OperationalError(e)
+
+
