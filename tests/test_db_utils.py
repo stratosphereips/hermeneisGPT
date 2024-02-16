@@ -186,7 +186,8 @@ def db_cursor():
         translation_tool_commit     TEXT,
         translation_model           TEXT,
         translation_config_sha256   TEXT,
-        translation_config          TEXT
+        translation_config          TEXT,
+        UNIQUE(translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config)
     )
     """)
     yield cursor
@@ -206,10 +207,10 @@ def test_insert_translation_parameters(db_cursor):
     """
 
     # Insert data into the database
-    last_row_id = insert_translation_parameters(db_cursor, translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config)
+    translation_parameters_id = insert_translation_parameters(db_cursor, translation_tool_name, translation_tool_commit, translation_model, translation_config_sha256, translation_config)
 
     # Query the database to verify the insertion
-    db_cursor.execute("SELECT * FROM translation_parameters WHERE translation_parameters_id=?", (last_row_id,))
+    db_cursor.execute("SELECT * FROM translation_parameters WHERE translation_parameters_id=?", (translation_parameters_id,))
 
     result = db_cursor.fetchone()
 
