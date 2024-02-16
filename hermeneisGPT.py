@@ -185,7 +185,7 @@ def main():
                     return
 
                 # Run automatic mode with sqlite db
-                # TODO
+                translate_mode_automatic(client, config, args)
 
     except Exception as err:
         logger.info("Exception in main()")
