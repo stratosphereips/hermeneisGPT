@@ -71,6 +71,7 @@ def translate_mode_manual(client, config):
     Run the LLM translation in manual interactive mode
     """
     try:
+        logger.debug("Starting manual translation")
         while True:
             print("Input your message to translate:")
             input_lang_ru=input().strip()
