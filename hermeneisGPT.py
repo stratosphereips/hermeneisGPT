@@ -118,7 +118,20 @@ def main():
                             choices=['manual', 'auto-sqlite'],
                             default='manual',
                             help='Select the mode (manual or auto-sqlite)')
+        parser.add_argument('-v',
+                            '--verbose',
+                            action='store_true',
+                            help='Run hermeneisGPT in verbose mode')
+        parser.add_argument('-d',
+                            '--debug',
+                            action='store_true',
+                            help='Run hermeneisGPT in verbose mode')
         args = parser.parse_args()
+
+        if args.verbose:
+            console_handler.setLevel(logging.INFO)
+        if args.debug:
+            console_handler.setLevel(logging.DEBUG)
 
         # Read YAML Configuration file
         config = load_and_parse_config(args.yaml_config)
