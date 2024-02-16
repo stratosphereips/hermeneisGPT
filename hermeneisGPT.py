@@ -8,9 +8,13 @@ using Large Language Models.
 
 import argparse
 import logging
+import os
 import yaml
 from dotenv import dotenv_values
 from openai import OpenAI
+from lib.utils import get_current_commit
+from lib.utils import get_file_sha256
+from lib.utils import get_file_content
 
 
 # Set up logging
@@ -72,8 +76,19 @@ def translate_mode_automatic(client, config, args):
     SQLite database. Translations will be written on
     the same DB.
     """
+    translation_tool_name = os.path.basename(__file__)
+    translation_tool_commit = get_current_commit()
+    translation_model = config['model']
+    translation_config_sha256 = get_file_sha256(args.yaml_config)
+    translation_config = get_file_content(args.yaml_config)
     try:
         logger.debug("Starting automatic translation")
+        logger.debug("Retrieving translation parameters based on user input")
+        logger.debug("Retrieving the tool name: %s", translation_tool_name)
+        logger.debug("Retrieving the tool current commit: %s", translation_tool_commit)
+        logger.debug("Retrieving the LLM model: %s", translation_model)
+        logger.debug("Retrieving the SHA256 of the YAML config file: %s", translation_config_sha256)
+        logger.debug("Retrieving the content of the YAML config file: %s bytes", len(translation_config))
     except KeyboardInterrupt:
         return
 def translate_mode_manual(client, config):
