@@ -1,5 +1,5 @@
 """
-HermeneisGPT is a tool and framework to translate messages and/or
+hermeneisGPT is a tool and framework to translate messages and/or
 text from hacktivist channels or forums from Russian to English
 using Large Language Models.
 """
