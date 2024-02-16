@@ -111,6 +111,11 @@ def main():
                             '--env',
                             default='.env',
                             help='Path to environment file (.env)')
+        parser.add_argument('-m',
+                            '--mode',
+                            choices=['manual', 'auto-sqlite'],
+                            default='manual',
+                            help='Select the mode (manual or auto-sqlite)')
         args = parser.parse_args()
 
         # Read YAML Configuration file
