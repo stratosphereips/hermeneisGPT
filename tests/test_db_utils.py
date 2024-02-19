@@ -14,6 +14,7 @@ from lib.db_utils import check_table_exists
 from lib.db_utils import read_sql_from_file
 from lib.db_utils import create_tables_from_schema
 from lib.db_utils import insert_translation_parameters
+from lib.db_utils import get_channel_messages
 
 
 def test_get_db_connection_success():
@@ -220,3 +221,18 @@ def test_insert_translation_parameters(db_cursor):
     assert result[3] == translation_model
     assert result[4] == translation_config_sha256
     assert result[5] == translation_config
+
+
+def test_get_channel_messages(setup_database):
+    """Test that get_channel_messages returns the correct messages for a channel."""
+    cursor = setup_database
+    messages = get_channel_messages(cursor, 'existing_channel')
+    assert messages == [(1, 'Test message')], "The messages retrieved do not match expected values."
+
+
+def test_get_channel_messages_no_channel(setup_database):
+    """Test that get_channel_messages returns an empty list for a non-existent channel."""
+    cursor = setup_database
+    messages = get_channel_messages(cursor, 'nonexistent_channel')
+    assert messages == [], "Messages were retrieved for a non-existent channel."
+
