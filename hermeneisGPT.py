@@ -83,6 +83,8 @@ def translate_mode_automatic(client, config, args):
     SQLite database. Translations will be written on
     the same DB.
     """
+    limit=int(args.max_limit)
+    count=1
     translation_tool_name = os.path.basename(__file__)
     translation_tool_commit = get_current_commit()
     translation_model = config['model']
@@ -123,20 +125,26 @@ def translate_mode_automatic(client, config, args):
         for message_id, message_text in channel_messages:
             logger.debug("Processing channel %s message %s (%s bytes)", args.channel_name, message_id, len(message_text))
             exists_translation = exists_translation_for_message(cursor, message_id, translation_parameters_id)
-            if not exists_translation:
-                # There is no translation for this message
-                logger.debug("Translating message %s with translation parameters ID %s", message_id, translation_parameters_id)
+            if count <= limit:
+                if not exists_translation:
+                    count = count+1
+                    # There is no translation for this message
+                    logger.debug("Translating message %s with translation parameters ID %s", message_id, translation_parameters_id)
 
-                # Translate it with OpenAI model
-                message_translated = translate(client, config, message_text)
+                    # Translate it with OpenAI model
+                    message_translated = translate(client, config, message_text)
 
-                # Update the translation for that row
-                msg_translation_id = upsert_message_translation(cursor, message_id, translation_parameters_id, message_translated)
-                logger.debug("Message %s translated with translation ID %s", message_id, msg_translation_id)
+                    # Update the translation for that row
+                    msg_translation_id = upsert_message_translation(cursor, message_id, translation_parameters_id, message_translated)
+                    logger.debug("Message %s translated with translation ID %s", message_id, msg_translation_id)
+                else:
+                    # There is a translation for this message
+                    logger.debug("Found translation for message %s with translation parameters ID %s", message_id, translation_parameters_id)
             else:
-                # There is a translation for this message
-                logger.debug("Found translation for message %s with translation parameters ID %s", message_id, translation_parameters_id)
+                # Translation quota reached
+                break
 
+        logger.info("Finished translating %s messages for %s channel", limit, args.channel_name)
         connection.commit()
         connection.close()
     except KeyboardInterrupt:
@@ -221,6 +229,9 @@ def main():
 
         parser.add_argument('--channel_name',
                             help='name of the hacktivist telegram channel to translate')
+        parser.add_argument('--max_limit',
+                            default=10,
+                            help='maximum number of messages to translate automatically (default=10)')
 
         parser.add_argument('--sqlite_db',
                             help='path to SQLite database with messages to translate')
