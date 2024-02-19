@@ -20,6 +20,7 @@ from lib.db_utils import create_tables_from_schema
 from lib.db_utils import has_channel_messages
 from lib.db_utils import insert_translation_parameters
 from lib.db_utils import get_channel_messages
+from lib.db_utils import exists_translation_for_message
 
 
 # Set up logging
@@ -116,6 +117,11 @@ def translate_mode_automatic(client, config, args):
 
         logger.debug("Retrieving messages for channel: %s", args.channel_name)
         channel_messages = get_channel_messages(cursor, args.channel_name)
+
+        logger.info("Processing '%s' messages for channel '%s'", len(channel_messages), args.channel_name)
+        for message_id, message_text in channel_messages:
+            logger.debug("Processing channel %s message %s (%s bytes)", args.channel_name, message_id, len(message_text))
+            exists_translation = exists_translation_for_message(cursor, message_id, translation_parameters_id)
 
         connection.commit()
         connection.close()
