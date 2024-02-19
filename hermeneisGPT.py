@@ -19,6 +19,7 @@ from lib.db_utils import get_db_connection
 from lib.db_utils import create_tables_from_schema
 from lib.db_utils import has_channel_messages
 from lib.db_utils import insert_translation_parameters
+from lib.db_utils import get_channel_messages
 
 
 # Set up logging
@@ -112,6 +113,10 @@ def translate_mode_automatic(client, config, args):
                                                                  translation_config)
 
         logger.debug("Storing translation parameters to DB and retrieving ID: %s", translation_parameters_id)
+
+        logger.debug("Retrieving messages for channel: %s", args.channel_name)
+        channel_messages = get_channel_messages(cursor, args.channel_name)
+
         connection.commit()
         connection.close()
     except KeyboardInterrupt:
