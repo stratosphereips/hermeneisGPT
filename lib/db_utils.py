@@ -181,3 +181,39 @@ def insert_translation_parameters(cursor, translation_tool_name, translation_too
         raise sqlite3.IntegrityError(f"Integrity error inserting into database: {e}")
     except sqlite3.OperationalError as e:
         raise sqlite3.OperationalError(f"Operational error inserting into database: {e}")
+
+
+def get_channel_messages(cursor, channel_name):
+    """
+    Function to retrieve messages from DB matching a channel name.
+
+    Parameters:
+    cursor
+    channel_name
+
+    Returns:
+    messages
+
+    Raises:
+    sqlerrors various
+    """
+    query = """
+    SELECT m.message_id, m.message_text
+    FROM messages m
+    JOIN channels c ON m.channel_id = c.channel_id
+    WHERE c.channel_name = ?
+    """
+
+    try:
+        cursor.execute(query, (channel_name,))
+        messages = cursor.fetchall()
+        return messages
+    except sqlite3.IntegrityError as e:
+        raise sqlite3.IntegrityError(f"Integrity error retriving from db: {e}")
+    except sqlite3.OperationalError as e:
+        raise sqlite3.OperationalError(f"Operational error retrieving from db: {e}")
+    except sqlite3.ProgrammingError as e:
+        raise sqlite3.ProgrammingError(f"Programming error occurred: {e}")
+    except sqlite3.DatabaseError as e:
+        raise sqlite3.DatabaseError(f"Database error occurred: {e}")
+
