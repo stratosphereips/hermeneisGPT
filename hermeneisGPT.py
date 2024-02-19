@@ -95,14 +95,14 @@ def translate_mode_automatic(client, config, args):
         create_tables_from_schema(connection, cursor, args.sqlite_schema)
 
         has_messages = has_channel_messages(cursor, args.channel_name)
-        logger.debug("Checking if there are messages for channel %s: %s", args.channel_name, has_messages),
+        logger.debug("Checking if there are messages for channel %s: %s", args.channel_name, has_messages)
 
         logger.debug("Retrieving translation parameters based on user input")
         logger.debug("Retrieving the tool name: %s", translation_tool_name)
         logger.debug("Retrieving the tool current commit: %s", translation_tool_commit)
         logger.debug("Retrieving the LLM model: %s", translation_model)
-        logger.debug("Retrieving the SHA256 of the YAML config file: %s", translation_config_sha256)
-        logger.debug("Retrieving the content of the YAML config file: %s bytes", len(translation_config))
+        logger.debug("Retrieving the YAML config file SHA256: %s", translation_config_sha256)
+        logger.debug("Retrieving the YAML config file: %s bytes", len(translation_config))
 
         translation_parameter_id = insert_translation_parameters(cursor,
                                                                  translation_tool_name,
