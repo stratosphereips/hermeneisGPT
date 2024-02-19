@@ -111,7 +111,7 @@ def translate_mode_automatic(client, config, args):
                                                                  translation_config_sha256,
                                                                  translation_config)
 
-        logger.debug("Storing translation parameters to DB and retrieving ID: %s", translation_parameter_id)
+        logger.debug("Storing translation parameters to DB and retrieving ID: %s", translation_parameters_id)
         connection.commit()
         connection.close()
     except KeyboardInterrupt:
