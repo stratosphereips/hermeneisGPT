@@ -131,6 +131,28 @@ def translate_mode_automatic(client, config, args):
         return
 
 
+def translate(client, config, message):
+    """
+    Run the LLM translation
+    """
+    try:
+        translate_messages = [{"role":"system", "content": config['system']},
+                              {"role":"user", "content": config['user']+message}]
+
+        # Initialize the OpenAI LLM (Language Learning Model)
+        llm_response = client.chat.completions.create(
+            model = config['model'],
+            messages = translate_messages,
+            max_tokens = config['max_tokens'],
+            temperature = config['temperature'],
+        )
+
+        return llm_response.choices[0].message.content
+
+    except Exception as err:
+        logger.debug("Exception in translate(): %s", err)
+
+
 def translate_mode_manual(client, config):
     """
     Run the LLM translation in manual interactive mode
@@ -141,17 +163,9 @@ def translate_mode_manual(client, config):
             print("Input your message to translate:")
             input_lang_ru=input().strip()
 
-            translate_messages = [{"role":"system", "content": config['system']},
-                                  {"role":"user", "content": config['user']+input_lang_ru}]
+            message_translated = translate(client, config, input_lang_ru)
 
-            # Initialize the OpenAI LLM (Language Learning Model)
-            llm_response = client.chat.completions.create(
-                model = config['model'],
-                messages = translate_messages,
-                max_tokens = config['max_tokens'],
-                temperature = config['temperature'],
-            )
-            print(llm_response.choices[0].message.content)
+            print(message_translated)
     except KeyboardInterrupt:
         return
 
