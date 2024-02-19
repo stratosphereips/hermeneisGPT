@@ -3,6 +3,7 @@ HermeneisGPT library of functions to handle SQLite DB transactions.
 """
 
 import sqlite3
+from datetime import datetime
 
 
 def get_db_connection(db_path):
@@ -251,3 +252,49 @@ def exists_translation_for_message(cursor, message_id, translation_parameters_id
         raise sqlite3.ProgrammingError(f"Programming error occurred: {e}")
     except sqlite3.DatabaseError as e:
         raise sqlite3.DatabaseError(f"Database error occurred: {e}")
+
+
+def upsert_message_translation(cursor, message_id, translation_parameters_id, translation_text):
+    """
+    Inserts or updates a translation in the message_translations table
+    based on the uniqueness of message_id and translation_parameters_id.
+
+    Parameters:
+    cursor
+    message_id
+    translation_parameters_id
+    translation_text
+
+    Returns:
+
+
+    Raises:
+    sqlerrors various
+    """
+    translation_timestamp = datetime.utcnow().isoformat()
+
+    query = """
+    INSERT OR REPLACE INTO message_translation (translation_id, message_id, translation_parameters_id, translation_text, translation_timestamp)
+    VALUES (
+        (SELECT translation_id FROM message_translation WHERE message_id = ? AND translation_parameters_id = ?),
+        ?, ?, ?, ?
+    )
+    """
+    try:
+        params = (
+            message_id,
+            translation_parameters_id,
+            message_id,
+            translation_parameters_id,
+            translation_text,
+            translation_timestamp
+        )
+        cursor.execute(query, params)
+
+        return cursor.lastrowid
+    except sqlite3.IntegrityError as e:
+        raise sqlite3.IntegrityError(f"Integrity error occurred while upserting message translation: {e}")
+    except sqlite3.OperationalError as e:
+        raise sqlite3.OperationalError(f"Operational error occurred while upserting message translation: {e}")
+    except sqlite3.DatabaseError as e:
+        raise sqlite3.DatabaseError(f"Database error occurred while upserting message translation: {e}")
