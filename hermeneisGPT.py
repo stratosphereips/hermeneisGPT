@@ -104,7 +104,7 @@ def translate_mode_automatic(client, config, args):
         logger.debug("Retrieving the YAML config file SHA256: %s", translation_config_sha256)
         logger.debug("Retrieving the YAML config file: %s bytes", len(translation_config))
 
-        translation_parameter_id = insert_translation_parameters(cursor,
+        translation_parameters_id = insert_translation_parameters(cursor,
                                                                  translation_tool_name,
                                                                  translation_tool_commit,
                                                                  translation_model,
