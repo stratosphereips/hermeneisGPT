@@ -15,6 +15,7 @@ from lib.db_utils import read_sql_from_file
 from lib.db_utils import create_tables_from_schema
 from lib.db_utils import insert_translation_parameters
 from lib.db_utils import get_channel_messages
+from lib.db_utils import exists_translation_for_message
 
 
 def test_get_db_connection_success():
@@ -41,14 +42,20 @@ def setup_database():
 
     # Create the schema
     cursor.execute("CREATE TABLE channels (channel_id INTEGER PRIMARY KEY, channel_name TEXT UNIQUE)")
-    cursor.execute("CREATE TABLE messages (message_id INTEGER PRIMARY KEY, channel_id INTEGER, message TEXT)")
+    cursor.execute("CREATE TABLE messages (message_id INTEGER PRIMARY KEY, channel_id INTEGER, message_text TEXT)")
+    cursor.execute("CREATE TABLE translation_parameters (translation_parameters_id INTEGER PRIMARY KEY, translation_tool_name TEXT)")
+    cursor.execute("CREATE TABLE message_translation (translation_id INTEGER PRIMARY KEY, message_id INTEGER, translation_parameters_id INTEGER, translation_text TEXT, FOREIGN KEY (message_id) REFERENCES messages(message_id), FOREIGN KEY (translation_parameters_id) REFERENCES translation_parameters(translation_parameters_id))")
 
     # Insert test data
     cursor.execute("INSERT INTO channels (channel_name) VALUES ('test_channel')")
     cursor.execute("INSERT INTO channels (channel_name) VALUES ('existing_channel')")
     cursor.execute("INSERT INTO channels (channel_name) VALUES ('empty_channel')")
     channel_id = cursor.execute("SELECT channel_id FROM channels WHERE channel_name = 'existing_channel'").fetchone()[0]
-    cursor.execute("INSERT INTO messages (channel_id, message) VALUES (?, 'Test message')", (channel_id,))
+    cursor.execute("INSERT INTO messages (channel_id, message_text) VALUES (?, 'Test message')", (channel_id,))
+    message_id = cursor.lastrowid
+    cursor.execute("INSERT INTO translation_parameters (translation_tool_name) VALUES ('Test tool')")
+    translation_parameters_id = cursor.lastrowid
+    cursor.execute("INSERT INTO message_translation (message_id, translation_parameters_id, translation_text) VALUES (?, ?, 'Translated text')", (message_id, translation_parameters_id))
 
     yield cursor
 
@@ -236,3 +243,18 @@ def test_get_channel_messages_no_channel(setup_database):
     messages = get_channel_messages(cursor, 'nonexistent_channel')
     assert messages == [], "Messages were retrieved for a non-existent channel."
 
+
+def test_exists_translation_for_message_true(setup_database):
+    """Test that exists_translation_for_message returns True when a translation exists."""
+    cursor = setup_database
+    message_id = 1  # Assuming the first inserted message has ID 1
+    translation_parameters_id = 1  # Assuming the first inserted translation parameters has ID 1
+    assert exists_translation_for_message(cursor, message_id, translation_parameters_id) is True, "Translation should exist but was not found."
+
+
+def test_exists_translation_for_message_false(setup_database):
+    """Test that exists_translation_for_message returns False when a translation does not exist."""
+    cursor = setup_database
+    message_id = 1  # Assuming the first inserted message has ID 1
+    translation_parameters_id = 999  # Using a non-existent translation_parameters_id
+    assert exists_translation_for_message(cursor, message_id, translation_parameters_id) is False, "Translation should not exist but was reported as found."
