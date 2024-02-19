@@ -130,6 +130,7 @@ def translate_mode_automatic(client, config, args):
                 # Translate it with OpenAI model
                 message_translated = translate(client, config, message_text)
 
+                # Update the translation for that row
                 msg_translation_id = upsert_message_translation(cursor, message_id, translation_parameters_id, message_translated)
                 logger.debug("Message %s translated with translation ID %s", message_id, msg_translation_id)
             else:

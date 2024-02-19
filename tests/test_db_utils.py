@@ -4,6 +4,7 @@ import pytest
 import sys
 import sqlite3
 from os import path
+from datetime import datetime
 import tempfile
 from os import remove
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -16,6 +17,7 @@ from lib.db_utils import create_tables_from_schema
 from lib.db_utils import insert_translation_parameters
 from lib.db_utils import get_channel_messages
 from lib.db_utils import exists_translation_for_message
+from lib.db_utils import upsert_message_translation
 
 
 def test_get_db_connection_success():
@@ -44,7 +46,7 @@ def setup_database():
     cursor.execute("CREATE TABLE channels (channel_id INTEGER PRIMARY KEY, channel_name TEXT UNIQUE)")
     cursor.execute("CREATE TABLE messages (message_id INTEGER PRIMARY KEY, channel_id INTEGER, message_text TEXT)")
     cursor.execute("CREATE TABLE translation_parameters (translation_parameters_id INTEGER PRIMARY KEY, translation_tool_name TEXT)")
-    cursor.execute("CREATE TABLE message_translation (translation_id INTEGER PRIMARY KEY, message_id INTEGER, translation_parameters_id INTEGER, translation_text TEXT, FOREIGN KEY (message_id) REFERENCES messages(message_id), FOREIGN KEY (translation_parameters_id) REFERENCES translation_parameters(translation_parameters_id))")
+    cursor.execute("CREATE TABLE message_translation (translation_id INTEGER PRIMARY KEY, message_id INTEGER, translation_parameters_id INTEGER, translation_text TEXT, translation_timestamp DATETIME, UNIQUE(message_id, translation_parameters_id), FOREIGN KEY (message_id) REFERENCES messages(message_id), FOREIGN KEY (translation_parameters_id) REFERENCES translation_parameters(translation_parameters_id))")
 
     # Insert test data
     cursor.execute("INSERT INTO channels (channel_name) VALUES ('test_channel')")
@@ -258,3 +260,34 @@ def test_exists_translation_for_message_false(setup_database):
     message_id = 1  # Assuming the first inserted message has ID 1
     translation_parameters_id = 999  # Using a non-existent translation_parameters_id
     assert exists_translation_for_message(cursor, message_id, translation_parameters_id) is False, "Translation should not exist but was reported as found."
+
+
+
+def test_insert_new_translation(setup_database):
+    """Test inserting a new translation."""
+    cursor = setup_database
+    message_id = 22
+    translation_parameters_id = 22
+    translation_text = "Translated Text"
+    new_translation_id = upsert_message_translation(cursor, message_id, translation_parameters_id, translation_text)
+
+    cursor.execute("SELECT COUNT(*) FROM message_translation WHERE message_id = ? AND translation_parameters_id = ?", (message_id, translation_parameters_id))
+    count = cursor.fetchone()[0]
+    assert count == 1, "Translation should have been inserted."
+    assert new_translation_id > 0, "Translation ID should be returned and greater than 0."
+
+
+def test_update_existing_translation(setup_database):
+    """Test updating an existing translation."""
+    cursor = setup_database
+    # First, insert a translation to update
+    message_id = 1
+    translation_parameters_id = 1
+
+    # Now, update the translation
+    updated_translation_text = "Updated translation"
+    upsert_message_translation(cursor, message_id, translation_parameters_id, updated_translation_text)
+
+    cursor.execute("SELECT translation_text FROM message_translation WHERE message_id = ? AND translation_parameters_id = ?", (message_id, translation_parameters_id))
+    translation_text = cursor.fetchone()[0]
+    assert translation_text == updated_translation_text, "Translation text should have been updated."
