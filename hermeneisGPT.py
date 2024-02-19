@@ -21,6 +21,7 @@ from lib.db_utils import has_channel_messages
 from lib.db_utils import insert_translation_parameters
 from lib.db_utils import get_channel_messages
 from lib.db_utils import exists_translation_for_message
+from lib.db_utils import upsert_message_translation
 
 
 # Set up logging
@@ -122,6 +123,18 @@ def translate_mode_automatic(client, config, args):
         for message_id, message_text in channel_messages:
             logger.debug("Processing channel %s message %s (%s bytes)", args.channel_name, message_id, len(message_text))
             exists_translation = exists_translation_for_message(cursor, message_id, translation_parameters_id)
+            if not exists_translation:
+                # There is no translation for this message
+                logger.debug("Translating message %s with translation parameters ID %s", message_id, translation_parameters_id)
+
+                # Translate it with OpenAI model
+                message_translated = translate(client, config, message_text)
+
+                msg_translation_id = upsert_message_translation(cursor, message_id, translation_parameters_id, message_translated)
+                logger.debug("Message %s translated with translation ID %s", message_id, msg_translation_id)
+            else:
+                # There is a translation for this message
+                logger.debug("Found translation for message %s with translation parameters ID %s", message_id, translation_parameters_id)
 
         connection.commit()
         connection.close()
