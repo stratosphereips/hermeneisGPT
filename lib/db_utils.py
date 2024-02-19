@@ -217,3 +217,37 @@ def get_channel_messages(cursor, channel_name):
     except sqlite3.DatabaseError as e:
         raise sqlite3.DatabaseError(f"Database error occurred: {e}")
 
+
+def exists_translation_for_message(cursor, message_id, translation_parameters_id):
+    """
+    Check if a translation exists for the message with given
+    translation_parameters_id.
+
+    Parameters:
+    cursor
+    message_id
+    translation_parameters_id
+
+    Returns:
+    bool
+
+    Raises:
+    sqlerrors various
+    """
+    query = """
+    SELECT COUNT(*)
+    FROM message_translation
+    WHERE message_id = ? AND translation_parameters_id = ?
+    """
+
+    try:
+        cursor.execute(query, (message_id, translation_parameters_id,))
+        return bool(cursor.fetchone()[0] > 0)
+    except sqlite3.IntegrityError as e:
+        raise sqlite3.IntegrityError(f"Integrity error occurred: {e}")
+    except sqlite3.OperationalError as e:
+        raise sqlite3.OperationalError(f"Operational error occurred: {e}")
+    except sqlite3.ProgrammingError as e:
+        raise sqlite3.ProgrammingError(f"Programming error occurred: {e}")
+    except sqlite3.DatabaseError as e:
+        raise sqlite3.DatabaseError(f"Database error occurred: {e}")
