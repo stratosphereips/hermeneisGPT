@@ -209,14 +209,14 @@ def get_channel_messages(cursor, channel_name):
         cursor.execute(query, (channel_name,))
         messages = cursor.fetchall()
         return messages
-    except sqlite3.IntegrityError as e:
-        raise sqlite3.IntegrityError(f"Integrity error retriving from db: {e}")
-    except sqlite3.OperationalError as e:
-        raise sqlite3.OperationalError(f"Operational error retrieving from db: {e}")
-    except sqlite3.ProgrammingError as e:
-        raise sqlite3.ProgrammingError(f"Programming error occurred: {e}")
-    except sqlite3.DatabaseError as e:
-        raise sqlite3.DatabaseError(f"Database error occurred: {e}")
+    except sqlite3.IntegrityError:
+        raise
+    except sqlite3.OperationalError:
+        raise
+    except sqlite3.ProgrammingError:
+        raise
+    except sqlite3.DatabaseError:
+        raise
 
 
 def exists_translation_for_message(cursor, message_id, translation_parameters_id):
@@ -244,14 +244,14 @@ def exists_translation_for_message(cursor, message_id, translation_parameters_id
     try:
         cursor.execute(query, (message_id, translation_parameters_id,))
         return bool(cursor.fetchone()[0] > 0)
-    except sqlite3.IntegrityError as e:
-        raise sqlite3.IntegrityError(f"Integrity error occurred: {e}")
-    except sqlite3.OperationalError as e:
-        raise sqlite3.OperationalError(f"Operational error occurred: {e}")
-    except sqlite3.ProgrammingError as e:
-        raise sqlite3.ProgrammingError(f"Programming error occurred: {e}")
-    except sqlite3.DatabaseError as e:
-        raise sqlite3.DatabaseError(f"Database error occurred: {e}")
+    except sqlite3.IntegrityError:
+        raise
+    except sqlite3.OperationalError:
+        raise
+    except sqlite3.ProgrammingError:
+        raise
+    except sqlite3.DatabaseError:
+        raise
 
 
 def upsert_message_translation(cursor, message_id, translation_parameters_id, translation_text):
@@ -292,9 +292,9 @@ def upsert_message_translation(cursor, message_id, translation_parameters_id, tr
         cursor.execute(query, params)
 
         return cursor.lastrowid
-    except sqlite3.IntegrityError as e:
-        raise sqlite3.IntegrityError(f"Integrity error occurred while upserting message translation: {e}")
-    except sqlite3.OperationalError as e:
-        raise sqlite3.OperationalError(f"Operational error occurred while upserting message translation: {e}")
-    except sqlite3.DatabaseError as e:
-        raise sqlite3.DatabaseError(f"Database error occurred while upserting message translation: {e}")
+    except sqlite3.IntegrityError:
+        raise
+    except sqlite3.OperationalError:
+        raise
+    except sqlite3.DatabaseError:
+        raise
