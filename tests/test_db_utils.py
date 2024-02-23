@@ -3,10 +3,12 @@
 import pytest
 import sys
 import sqlite3
+import tempfile
 from os import path
 from datetime import datetime
-import tempfile
 from os import remove
+from unittest.mock import patch
+from unittest.mock import MagicMock
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from lib.db_utils import get_db_connection
 from lib.db_utils import check_channel_exists
@@ -64,7 +66,7 @@ def setup_database():
     connection.close()
 
 
-def test_channel_exists(setup_database):
+def test_check_channel_exists(setup_database):
     """
     Test that check_channel_exists returns the correct
     channel_id when the channel exists.
@@ -76,13 +78,33 @@ def test_channel_exists(setup_database):
     assert actual_channel_id == expected_channel_id[0]
 
 
-def test_channel_does_not_exist(setup_database):
+def test_check_channel_does_not_exist(setup_database):
     """
     Test that check_channel_exists returns None when the
     channel does not exist.
     """
     cursor = setup_database
     assert check_channel_exists(cursor, 'nonexistent_channel') is None
+
+
+@pytest.mark.parametrize("exception", [
+    sqlite3.OperationalError,
+    sqlite3.IntegrityError,
+    sqlite3.ProgrammingError,
+    sqlite3.DatabaseError
+])
+def test_check_channel_exceptions(setup_database, exception):
+    """
+    Test that check_channel_exists correctly raises sqlite3 exceptions.
+    """
+    with patch('lib.db_utils.sqlite3.connect') as mock_connect:
+        mock_conn = mock_connect.return_value
+        mock_cursor = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        mock_cursor.execute.side_effect = exception()
+
+        with pytest.raises(exception):
+            check_channel_exists(mock_cursor, 'test_channel')
 
 
 def test_has_channel_messages_true(setup_database):
