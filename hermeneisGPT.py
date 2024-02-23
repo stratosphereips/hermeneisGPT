@@ -125,23 +125,30 @@ def translate_mode_automatic(client, config, args):
         for message_id, message_text in channel_messages:
             logger.debug("Processing channel %s message %s (%s bytes)", args.channel_name, message_id, len(message_text))
             exists_translation = exists_translation_for_message(cursor, message_id, translation_parameters_id)
-            if count <= limit:
-                if not exists_translation:
-                    count = count+1
-                    # There is no translation for this message
-                    logger.debug("Translating message %s with translation parameters ID %s", message_id, translation_parameters_id)
 
-                    # Translate it with OpenAI model
+            if not exists_translation:
+                # There is no translation for this message
+                if len(message_text) > 1:
+                    count = count+1
+
+                    # Message is not empty, translate it with OpenAI model
+                    logger.debug("Translating message %s with translation parameters ID %s", message_id, translation_parameters_id)
                     message_translated = translate(client, config, message_text)
 
                     # Update the translation for that row
                     msg_translation_id = upsert_message_translation(cursor, message_id, translation_parameters_id, message_translated)
                     logger.debug("Message %s translated with translation ID %s", message_id, msg_translation_id)
                 else:
-                    # There is a translation for this message
-                    logger.debug("Found translation for message %s with translation parameters ID %s", message_id, translation_parameters_id)
+                    # Message is too short (1 byte), do not translate
+                    logger.debug("Translation cancelled for message %s, too small (%s)", message_id, message_text)
             else:
+                # There is a translation for this message
+                logger.debug("Found translation for message %s with translation parameters ID %s", message_id, translation_parameters_id)
+
+            # Check if we did not reach the translation limit (number of iterations)
+            if count > limit:
                 # Translation quota reached
+                logger.debug("Translation limit reached, stopping translation")
                 break
 
         logger.info("Finished translating %s messages for %s channel", limit, args.channel_name)
@@ -179,17 +186,24 @@ def translate_mode_manual(client, config):
     """
     Run the LLM translation in manual interactive mode
     """
+    user_input_msg = "Input your message to translate:"
+
     try:
         logger.debug("Starting manual translation")
         while True:
-            print("Input your message to translate:")
+            # Read user input to translate
+            print(user_input_msg)
             input_lang_ru=input().strip()
 
-            message_translated = translate(client, config, input_lang_ru)
-
-            print(message_translated)
+            if input_lang_ru and input_lang_ru != user_input_msg:
+                message_translated = translate(client, config, input_lang_ru)
+                print(message_translated)
+            else:
+                # User input is empty or matched the system message
+                pass
     except KeyboardInterrupt:
         return
+
 
 def main():
     """
