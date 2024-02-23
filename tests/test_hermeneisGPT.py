@@ -1,12 +1,15 @@
 # pylint: disable=missing-docstring
+import argparse
 import sys
 import pytest
 import logging
 from os import path
 from unittest.mock import patch
-
+from unittest.mock import MagicMock
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from hermeneisGPT import load_and_parse_config
+from hermeneisGPT import main
+
 
 def test_load_and_parse_config_success(tmp_path):
     directory = tmp_path / "sub"
@@ -40,6 +43,7 @@ def test_load_and_parse_config_success(tmp_path):
         'log': 'output.log',
     }
 
+
 # Example of a failure to load due to file not found or other IO issues
 def test_load_and_parse_config_failure(tmp_path):
     non_existent_file_path = tmp_path / "does_not_exist.yaml"
@@ -52,3 +56,44 @@ def test_load_and_parse_config_failure(tmp_path):
     # Check if 'error' was called at least once
     mock_error.assert_called_once()
 
+
+def test_argument_parsing():
+    test_args = [
+        "hermeneisGPT.py",
+        "--verbose",
+        "--debug",
+        "--yaml_config", "path/to/config.yml",
+        "--env", "path/to/.env",
+        "--mode", "auto-sqlite",
+        "--channel_name", "example_channel",
+        "--max_limit", "5",
+        "--sqlite_db", "path/to/database.db",
+        "--sqlite_schema", "path/to/schema.sql",
+        "--sqlite_chn_table", "custom_channels",
+        "--sqlite_chn_field", "custom_channel_name",
+        "--sqlite_msg_table", "custom_messages",
+        "--sqlite_msg_field", "custom_message_text"
+    ]
+
+    with patch('sys.argv', test_args):
+        with patch('argparse.ArgumentParser.parse_args') as mock_parse:
+            # Set the return value of parse_args to simulate parsed arguments
+            mock_parse.return_value = argparse.Namespace(
+                                                        verbose=True,
+                                                        debug=True,
+                                                        yaml_config="path/to/config.yml",
+                                                        env="path/to/.env",
+                                                        mode="auto-sqlite",
+                                                        channel_name="example_channel",
+                                                        max_limit="5",
+                                                        sqlite_db="path/to/database.db",
+                                                        sqlite_schema="path/to/schema.sql",
+                                                        sqlite_chn_table="custom_channels",
+                                                        sqlite_chn_field="custom_channel_name",
+                                                        sqlite_msg_table="custom_messages",
+                                                        sqlite_msg_field="custom_messages_text",
+                                                        )
+            main()
+
+            # Verify parse_args was called indicating arguments were parsed
+            mock_parse.assert_called()
