@@ -14,7 +14,7 @@ def get_current_commit():
         commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()
         return commit_hash
     except subprocess.CalledProcessError:
-        raise subprocess.CalledProcessError
+        raise
 
 
 def get_file_sha256(file_path):
