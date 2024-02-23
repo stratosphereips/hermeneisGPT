@@ -433,3 +433,24 @@ def test_update_existing_translation(setup_database):
     cursor.execute("SELECT translation_text FROM message_translation WHERE message_id = ? AND translation_parameters_id = ?", (message_id, translation_parameters_id))
     translation_text = cursor.fetchone()[0]
     assert translation_text == updated_translation_text, "Translation text should have been updated."
+
+
+@pytest.mark.parametrize("exception", [
+    sqlite3.IntegrityError,
+    sqlite3.OperationalError,
+    sqlite3.DatabaseError,
+])
+def test_upsert_message_translation_exceptions(exception):
+    """
+    Test that upsert_message_translation correctly re-raises sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    message_id = 1
+    translation_parameters_id = 2
+    translation_text = "Sample translation text"
+
+    # Configure the cursor.execute to raise the specified exception
+    cursor.execute.side_effect = exception("Simulated database error")
+
+    with pytest.raises(exception):
+        upsert_message_translation(cursor, message_id, translation_parameters_id, translation_text)
