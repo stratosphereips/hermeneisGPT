@@ -5,7 +5,6 @@ import pytest
 import logging
 from os import path
 from unittest.mock import patch
-from unittest.mock import MagicMock
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from hermeneisGPT import load_and_parse_config
 from hermeneisGPT import main
