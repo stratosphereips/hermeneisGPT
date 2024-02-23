@@ -243,6 +243,28 @@ def test_create_tables_from_schema(setup_database):
         connection.close()
 
 
+@pytest.mark.parametrize("exception", [sqlite3.OperationalError])
+def test_create_tables_from_schema_exceptions(exception):
+    """
+    Test that create_tables_from_schema correctly handles exceptions.
+    """
+    connection = MagicMock()
+    cursor = MagicMock()
+    schema_file_path = 'path/to/schema.sql'
+
+    # Mock read_sql_from_file to return a specific SQL command
+    with patch('lib.db_utils.read_sql_from_file', return_value="CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY);"):
+        # Set the side_effect of cursor.executescript to raise the specified exception
+        cursor.executescript.side_effect = exception
+
+        # Ensure connection.rollback is called and sqlite3.OperationalError is raised
+        with pytest.raises(sqlite3.OperationalError):
+            create_tables_from_schema(connection, cursor, schema_file_path)
+
+        # Verify that rollback was called in the event of an exception
+        connection.rollback.assert_called_once()
+
+
 @pytest.fixture
 def db_cursor():
     # Create an in-memory SQLite database and cursor
