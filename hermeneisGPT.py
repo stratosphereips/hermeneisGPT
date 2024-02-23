@@ -125,8 +125,6 @@ def translate_mode_automatic(client, config, args):
         for message_id, message_text in channel_messages:
             logger.debug("Processing channel %s message %s (%s bytes)", args.channel_name, message_id, len(message_text))
             exists_translation = exists_translation_for_message(cursor, message_id, translation_parameters_id)
-            if count <= limit:
-                if not exists_translation:
 
             if not exists_translation:
                 # There is no translation for this message
@@ -146,7 +144,10 @@ def translate_mode_automatic(client, config, args):
                 # There is a translation for this message
                 logger.debug("Found translation for message %s with translation parameters ID %s", message_id, translation_parameters_id)
 
+            # Check if we did not reach the translation limit (number of iterations)
+            if count > limit:
                 # Translation quota reached
+                logger.debug("Translation limit reached, stopping translation")
                 break
 
         logger.info("Finished translating %s messages for %s channel", limit, args.channel_name)
