@@ -5,15 +5,44 @@
 
 
 HermeneisGPT is a framework to translate hacking messages from Russian to English using LLM models.
-![image](https://github.com/stratosphereips/hermeneisGPT/assets/2458879/c1eac777-f760-4523-b7df-9860b62a0b07)
+<img width="2379" alt="image" src="https://github.com/stratosphereips/hermeneisGPT/assets/2458879/f2d22244-e900-465a-ae0a-324d29faea38">
 
 
+<details>
+  <summary><h2>Expand for Installation Instructions</h2></summary>   
+To configure and run the tool, follow the next steps:
 
+```bash
+:~$ git clone https://github.com/stratosphereips/hermeneisGPT.git
+:~$ 
+:~$ cd hermeneisGPT
+:~$ 
+:~$ python3 -m pip install -r requirements.txt
+:~$ 
+:~$ cp env_EXAMPLE .env
+:~$ 
+:~$ # Edit the .env file to add your OpenAI API Key
+:~$ vim .env
+```
+</details>
 
-# Installation
+<details>
+  <summary><h2>Expand for Execution Instructions</h2></summary>
 
-1. Install the requirements: `python3 -m pip install -r requirements.txt`
-2. Create .env file with OpenAI API Key:
-    - `cp env_EXAMPLE .env`
-    - `vim .env`
-5.  Run the tool: `python3 hermeneisGPT.py --help`
+Run hermeneisGPT help:
+
+```bash 
+python3 hermeneisGPT.py --help
+```
+
+Run hermeneisGPT in manual interactive mode: 
+
+```bash
+python3 hermeneisGPT.py -m manual
+```
+
+Run hermeneisGPT in automatic mode using the example SQLite DB: 
+```bash
+python3 hermeneisGPT.py -m auto-sqlite --channel_name noname05716 --sqlite_db assets/sample.sqlite -d
+```
+</details>
