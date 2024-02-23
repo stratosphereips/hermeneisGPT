@@ -3,10 +3,12 @@
 import pytest
 import sys
 import sqlite3
+import tempfile
 from os import path
 from datetime import datetime
-import tempfile
 from os import remove
+from unittest.mock import patch
+from unittest.mock import MagicMock
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 from lib.db_utils import get_db_connection
 from lib.db_utils import check_channel_exists
@@ -64,7 +66,7 @@ def setup_database():
     connection.close()
 
 
-def test_channel_exists(setup_database):
+def test_check_channel_exists(setup_database):
     """
     Test that check_channel_exists returns the correct
     channel_id when the channel exists.
@@ -76,13 +78,35 @@ def test_channel_exists(setup_database):
     assert actual_channel_id == expected_channel_id[0]
 
 
-def test_channel_does_not_exist(setup_database):
+def test_check_channel_does_not_exist(setup_database):
     """
     Test that check_channel_exists returns None when the
     channel does not exist.
     """
     cursor = setup_database
     assert check_channel_exists(cursor, 'nonexistent_channel') is None
+
+
+@pytest.mark.parametrize("exception", [
+    sqlite3.OperationalError,
+    sqlite3.IntegrityError,
+    sqlite3.ProgrammingError,
+    sqlite3.DatabaseError
+])
+def test_check_channel_exceptions(exception):
+    """
+    Test that check_channel_exists correctly raises sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    channel_name = 'test_channel'
+
+    # Mock  to return a valid channel ID
+    with patch('lib.db_utils.check_channel_exists', return_value=1):
+        # Then mock cursor.execute to raise the specified exception
+        cursor.execute.side_effect = exception
+
+        with pytest.raises(exception):
+            has_channel_messages(cursor, channel_name)
 
 
 def test_has_channel_messages_true(setup_database):
@@ -103,6 +127,28 @@ def test_has_channel_messages_nonexistent_channel(setup_database):
     """
     cursor = setup_database
     assert has_channel_messages(cursor, 'nonexistent_channel') is False
+
+
+@pytest.mark.parametrize("exception", [
+    sqlite3.OperationalError,
+    sqlite3.IntegrityError,
+    sqlite3.ProgrammingError,
+    sqlite3.DatabaseError
+])
+def test_has_channel_messages_exceptions(exception):
+    """
+    Test that has_channel_messages correctly raises sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    channel_name = 'existing_channel'
+
+    # Mock check_channel_exists to return a valid channel ID
+    with patch('lib.db_utils.has_channel_messages', return_value=1):
+        # Then mock cursor.execute to raise the specified exception
+        cursor.execute.side_effect = exception
+
+        with pytest.raises(exception):
+            has_channel_messages(cursor, channel_name)
 
 
 def test_schema_validity():
@@ -138,6 +184,20 @@ def test_check_table_exists_true(setup_database):
 def test_check_table_exists_false(setup_database):
     cursor = setup_database
     assert check_table_exists(cursor, "non_existent_table") is False, "Should return False for non-existent table"
+
+
+@pytest.mark.parametrize("exception", [sqlite3.OperationalError])
+def test_check_table_exists_exceptions(exception):
+    """
+    Test that check_table_exists correctly raises sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    table_name = 'channels'
+
+    cursor.execute.side_effect = exception
+
+    with pytest.raises(exception):
+        check_table_exists(cursor, table_name)
 
 
 def test_read_sql_from_file():
@@ -181,6 +241,28 @@ def test_create_tables_from_schema(setup_database):
         # Clean up - remove the temporary file and close the database connection
         remove(tmpfile_name)
         connection.close()
+
+
+@pytest.mark.parametrize("exception", [sqlite3.OperationalError])
+def test_create_tables_from_schema_exceptions(exception):
+    """
+    Test that create_tables_from_schema correctly handles exceptions.
+    """
+    connection = MagicMock()
+    cursor = MagicMock()
+    schema_file_path = 'path/to/schema.sql'
+
+    # Mock read_sql_from_file to return a specific SQL command
+    with patch('lib.db_utils.read_sql_from_file', return_value="CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY);"):
+        # Set the side_effect of cursor.executescript to raise the specified exception
+        cursor.executescript.side_effect = exception
+
+        # Ensure connection.rollback is called and sqlite3.OperationalError is raised
+        with pytest.raises(sqlite3.OperationalError):
+            create_tables_from_schema(connection, cursor, schema_file_path)
+
+        # Verify that rollback was called in the event of an exception
+        connection.rollback.assert_called_once()
 
 
 @pytest.fixture
@@ -232,6 +314,26 @@ def test_insert_translation_parameters(db_cursor):
     assert result[5] == translation_config
 
 
+@pytest.mark.parametrize("exception,expected_exception", [
+    (sqlite3.IntegrityError, sqlite3.IntegrityError),
+    (sqlite3.OperationalError, sqlite3.OperationalError),
+])
+def test_insert_translation_parameters_exceptions(exception, expected_exception):
+    """
+    Test that insert_translation_parameters correctly handles sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    args = ('tool_name', 'commit_hash', 'model_name', 'config_sha256', 'config_data')
+
+    # Configure the cursor.execute to raise the specified exception
+    cursor.execute.side_effect = exception("Simulated database error")
+
+    with pytest.raises(expected_exception) as exc_info:
+        insert_translation_parameters(cursor, *args)
+
+    assert "inserting into database" in str(exc_info.value)
+
+
 def test_get_channel_messages(setup_database):
     """Test that get_channel_messages returns the correct messages for a channel."""
     cursor = setup_database
@@ -244,6 +346,26 @@ def test_get_channel_messages_no_channel(setup_database):
     cursor = setup_database
     messages = get_channel_messages(cursor, 'nonexistent_channel')
     assert messages == [], "Messages were retrieved for a non-existent channel."
+
+
+@pytest.mark.parametrize("exception", [
+    sqlite3.IntegrityError,
+    sqlite3.OperationalError,
+    sqlite3.ProgrammingError,
+    sqlite3.DatabaseError,
+])
+def test_get_channel_messages_exceptions(exception):
+    """
+    Test that get_channel_messages correctly handles various sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    channel_name = 'test_channel'
+
+    # Configure the cursor.execute to raise the specified exception
+    cursor.execute.side_effect = exception("Simulated database error")
+
+    with pytest.raises(exception):
+        get_channel_messages(cursor, channel_name)
 
 
 def test_exists_translation_for_message_true(setup_database):
@@ -261,6 +383,26 @@ def test_exists_translation_for_message_false(setup_database):
     translation_parameters_id = 999  # Using a non-existent translation_parameters_id
     assert exists_translation_for_message(cursor, message_id, translation_parameters_id) is False, "Translation should not exist but was reported as found."
 
+
+@pytest.mark.parametrize("exception", [
+    sqlite3.IntegrityError,
+    sqlite3.OperationalError,
+    sqlite3.ProgrammingError,
+    sqlite3.DatabaseError,
+])
+def test_exists_translation_for_message_exceptions(exception):
+    """
+    Test that exists_translation_for_message correctly re-raises sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    message_id = 1
+    translation_parameters_id = 1
+
+    # Configure the cursor.execute to raise the specified exception
+    cursor.execute.side_effect = exception("Simulated database error")
+
+    with pytest.raises(exception):
+        exists_translation_for_message(cursor, message_id, translation_parameters_id)
 
 
 def test_insert_new_translation(setup_database):
@@ -291,3 +433,24 @@ def test_update_existing_translation(setup_database):
     cursor.execute("SELECT translation_text FROM message_translation WHERE message_id = ? AND translation_parameters_id = ?", (message_id, translation_parameters_id))
     translation_text = cursor.fetchone()[0]
     assert translation_text == updated_translation_text, "Translation text should have been updated."
+
+
+@pytest.mark.parametrize("exception", [
+    sqlite3.IntegrityError,
+    sqlite3.OperationalError,
+    sqlite3.DatabaseError,
+])
+def test_upsert_message_translation_exceptions(exception):
+    """
+    Test that upsert_message_translation correctly re-raises sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    message_id = 1
+    translation_parameters_id = 2
+    translation_text = "Sample translation text"
+
+    # Configure the cursor.execute to raise the specified exception
+    cursor.execute.side_effect = exception("Simulated database error")
+
+    with pytest.raises(exception):
+        upsert_message_translation(cursor, message_id, translation_parameters_id, translation_text)
