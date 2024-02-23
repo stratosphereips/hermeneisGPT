@@ -186,6 +186,20 @@ def test_check_table_exists_false(setup_database):
     assert check_table_exists(cursor, "non_existent_table") is False, "Should return False for non-existent table"
 
 
+@pytest.mark.parametrize("exception", [sqlite3.OperationalError])
+def test_check_table_exists_exceptions(exception):
+    """
+    Test that check_table_exists correctly raises sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    table_name = 'channels'
+
+    cursor.execute.side_effect = exception
+
+    with pytest.raises(exception):
+        check_table_exists(cursor, table_name)
+
+
 def test_read_sql_from_file():
     # Create a temporary file with known SQL content
     expected_sql_content = "CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT);"
