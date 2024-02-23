@@ -127,20 +127,25 @@ def translate_mode_automatic(client, config, args):
             exists_translation = exists_translation_for_message(cursor, message_id, translation_parameters_id)
             if count <= limit:
                 if not exists_translation:
-                    count = count+1
-                    # There is no translation for this message
-                    logger.debug("Translating message %s with translation parameters ID %s", message_id, translation_parameters_id)
 
-                    # Translate it with OpenAI model
+            if not exists_translation:
+                # There is no translation for this message
+                    count = count+1
+
+                    # Message is not empty, translate it with OpenAI model
+                    logger.debug("Translating message %s with translation parameters ID %s", message_id, translation_parameters_id)
                     message_translated = translate(client, config, message_text)
 
                     # Update the translation for that row
                     msg_translation_id = upsert_message_translation(cursor, message_id, translation_parameters_id, message_translated)
                     logger.debug("Message %s translated with translation ID %s", message_id, msg_translation_id)
                 else:
-                    # There is a translation for this message
-                    logger.debug("Found translation for message %s with translation parameters ID %s", message_id, translation_parameters_id)
+                    # Message is too short (1 byte), do not translate
+                    logger.debug("Translation cancelled for message %s, too small (%s)", message_id, message_text)
             else:
+                # There is a translation for this message
+                logger.debug("Found translation for message %s with translation parameters ID %s", message_id, translation_parameters_id)
+
                 # Translation quota reached
                 break
 
