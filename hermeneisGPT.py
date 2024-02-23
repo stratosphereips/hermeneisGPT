@@ -128,6 +128,7 @@ def translate_mode_automatic(client, config, args):
 
             if not exists_translation:
                 # There is no translation for this message
+                if len(message_text) > 1:
                     count = count+1
 
                     # Message is not empty, translate it with OpenAI model
