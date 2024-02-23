@@ -348,6 +348,28 @@ def test_get_channel_messages_no_channel(setup_database):
     assert messages == [], "Messages were retrieved for a non-existent channel."
 
 
+@pytest.mark.parametrize("exception,expected_exception,expected_message", [
+    (sqlite3.IntegrityError, sqlite3.IntegrityError, "Integrity error retriving from db"),
+    (sqlite3.OperationalError, sqlite3.OperationalError, "Operational error retrieving from db"),
+    (sqlite3.ProgrammingError, sqlite3.ProgrammingError, "Programming error occurred"),
+    (sqlite3.DatabaseError, sqlite3.DatabaseError, "Database error occurred"),
+])
+def test_get_channel_messages_exceptions(exception, expected_exception, expected_message):
+    """
+    Test that get_channel_messages correctly handles various sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    channel_name = 'test_channel'
+
+    # Configure the cursor.execute to raise the specified exception
+    cursor.execute.side_effect = exception("Simulated database error")
+
+    with pytest.raises(expected_exception) as exc_info:
+        get_channel_messages(cursor, channel_name)
+
+    assert expected_message in str(exc_info.value)
+
+
 def test_exists_translation_for_message_true(setup_database):
     """Test that exists_translation_for_message returns True when a translation exists."""
     cursor = setup_database
@@ -362,7 +384,6 @@ def test_exists_translation_for_message_false(setup_database):
     message_id = 1  # Assuming the first inserted message has ID 1
     translation_parameters_id = 999  # Using a non-existent translation_parameters_id
     assert exists_translation_for_message(cursor, message_id, translation_parameters_id) is False, "Translation should not exist but was reported as found."
-
 
 
 def test_insert_new_translation(setup_database):
