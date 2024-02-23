@@ -179,17 +179,24 @@ def translate_mode_manual(client, config):
     """
     Run the LLM translation in manual interactive mode
     """
+    user_input_msg = "Input your message to translate:"
+
     try:
         logger.debug("Starting manual translation")
         while True:
-            print("Input your message to translate:")
+            # Read user input to translate
+            print(user_input_msg)
             input_lang_ru=input().strip()
 
-            message_translated = translate(client, config, input_lang_ru)
-
-            print(message_translated)
+            if input_lang_ru and input_lang_ru != user_input_msg:
+                message_translated = translate(client, config, input_lang_ru)
+                print(message_translated)
+            else:
+                # User input is empty or matched the system message
+                pass
     except KeyboardInterrupt:
         return
+
 
 def main():
     """
