@@ -127,6 +127,28 @@ def test_has_channel_messages_nonexistent_channel(setup_database):
     assert has_channel_messages(cursor, 'nonexistent_channel') is False
 
 
+@pytest.mark.parametrize("exception", [
+    sqlite3.OperationalError,
+    sqlite3.IntegrityError,
+    sqlite3.ProgrammingError,
+    sqlite3.DatabaseError
+])
+def test_has_channel_messages_exceptions(exception):
+    """
+    Test that has_channel_messages correctly raises sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    channel_name = 'existing_channel'
+
+    # Mock check_channel_exists to return a valid channel ID
+    with patch('lib.db_utils.check_channel_exists', return_value=1):
+        # Then mock cursor.execute to raise the specified exception
+        cursor.execute.side_effect = exception
+
+        with pytest.raises(exception):
+            has_channel_messages(cursor, channel_name)
+
+
 def test_schema_validity():
     # Connect to an in-memory SQLite database
     conn = sqlite3.connect(':memory:')
