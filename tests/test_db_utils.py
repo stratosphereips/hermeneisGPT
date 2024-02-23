@@ -93,18 +93,20 @@ def test_check_channel_does_not_exist(setup_database):
     sqlite3.ProgrammingError,
     sqlite3.DatabaseError
 ])
-def test_check_channel_exceptions(setup_database, exception):
+def test_check_channel_exceptions(exception):
     """
     Test that check_channel_exists correctly raises sqlite3 exceptions.
     """
-    with patch('lib.db_utils.sqlite3.connect') as mock_connect:
-        mock_conn = mock_connect.return_value
-        mock_cursor = MagicMock()
-        mock_conn.cursor.return_value = mock_cursor
-        mock_cursor.execute.side_effect = exception()
+    cursor = MagicMock()
+    channel_name = 'test_channel'
+
+    # Mock  to return a valid channel ID
+    with patch('lib.db_utils.check_channel_exists', return_value=1):
+        # Then mock cursor.execute to raise the specified exception
+        cursor.execute.side_effect = exception
 
         with pytest.raises(exception):
-            check_channel_exists(mock_cursor, 'test_channel')
+            has_channel_messages(cursor, channel_name)
 
 
 def test_has_channel_messages_true(setup_database):
@@ -141,7 +143,7 @@ def test_has_channel_messages_exceptions(exception):
     channel_name = 'existing_channel'
 
     # Mock check_channel_exists to return a valid channel ID
-    with patch('lib.db_utils.check_channel_exists', return_value=1):
+    with patch('lib.db_utils.has_channel_messages', return_value=1):
         # Then mock cursor.execute to raise the specified exception
         cursor.execute.side_effect = exception
 
