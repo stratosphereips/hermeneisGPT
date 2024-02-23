@@ -314,6 +314,26 @@ def test_insert_translation_parameters(db_cursor):
     assert result[5] == translation_config
 
 
+@pytest.mark.parametrize("exception,expected_exception", [
+    (sqlite3.IntegrityError, sqlite3.IntegrityError),
+    (sqlite3.OperationalError, sqlite3.OperationalError),
+])
+def test_insert_translation_parameters_exceptions(exception, expected_exception):
+    """
+    Test that insert_translation_parameters correctly handles sqlite3 exceptions.
+    """
+    cursor = MagicMock()
+    args = ('tool_name', 'commit_hash', 'model_name', 'config_sha256', 'config_data')
+
+    # Configure the cursor.execute to raise the specified exception
+    cursor.execute.side_effect = exception("Simulated database error")
+
+    with pytest.raises(expected_exception) as exc_info:
+        insert_translation_parameters(cursor, *args)
+
+    assert "inserting into database" in str(exc_info.value)
+
+
 def test_get_channel_messages(setup_database):
     """Test that get_channel_messages returns the correct messages for a channel."""
     cursor = setup_database
