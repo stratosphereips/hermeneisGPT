@@ -1,15 +1,17 @@
+![hermeneisGPT](https://github.com/stratosphereips/hermeneisGPT/assets/2458879/4ce8d9c3-be30-4398-80f4-297273dcca58)
 # hermeneisGPT
 [![Auto Tag](https://github.com/stratosphereips/hermeneisGPT/actions/workflows/autotag.yml/badge.svg)](https://github.com/stratosphereips/hermeneisGPT/actions/workflows/autotag.yml)
 [![Validate Python](https://github.com/stratosphereips/hermeneisGPT/actions/workflows/validate_python.yml/badge.svg)](https://github.com/stratosphereips/hermeneisGPT/actions/workflows/validate_python.yml)
 [![Validate Yaml](https://github.com/stratosphereips/hermeneisGPT/actions/workflows/validate_yaml.yml/badge.svg)](https://github.com/stratosphereips/hermeneisGPT/actions/workflows/validate_yaml.yml)
 
 
-HermeneisGPT is a framework to translate hacking messages from Russian to English using LLM models.
-<img width="2379" alt="image" src="https://github.com/stratosphereips/hermeneisGPT/assets/2458879/f2d22244-e900-465a-ae0a-324d29faea38">
+HermeneisGPT is a framework to translate messages using Large Language Models (LLM). The tool was initially created to help translate messages from Russian to English from hacktivist Telegram channels. However, it can be used for any application or language. The instructions can be specified through a YAML configuration file. Currently it supports two modes, manual and automatic. 
 
+## Installation
 
 <details>
-  <summary><h2>Expand for Installation Instructions</h2></summary>   
+  <summary>Expand for Installation Instructions</summary>
+
 To configure and run the tool, follow the next steps:
 
 ```bash
@@ -26,8 +28,10 @@ To configure and run the tool, follow the next steps:
 ```
 </details>
 
+## Execution
+
 <details>
-  <summary><h2>Expand for Execution Instructions</h2></summary>
+  <summary>Expand for Execution Instructions</summary>
 
 Run hermeneisGPT help:
 
@@ -46,3 +50,7 @@ Run hermeneisGPT in automatic mode using the example SQLite DB:
 python3 hermeneisGPT.py -m auto-sqlite --channel_name noname05716 --sqlite_db assets/sample.sqlite -d
 ```
 </details>
+
+# About
+
+HermeneisGPT was created in 2024 at the Stratosphere Laboratory, AI Center, FEE, Czech Technical University in Prague.
