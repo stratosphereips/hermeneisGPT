@@ -353,7 +353,13 @@ def main():
                     return
 
                 # Run automatic mode with sqlite db
-                translate_mode_automatic(client, config, args)
+                calculate_cost_analysis(config, args)
+                print("Proceeding with the following actions will incur costs. Do you wish to continue? (Y/N)")
+                user_input = input()
+
+                if user_input == "Y" or user_input == "y":
+                    # Run automatic mode with sqlite db
+                    translate_mode_automatic(client, config, args)
 
     except Exception as err:
         logger.info("Exception in main()")
