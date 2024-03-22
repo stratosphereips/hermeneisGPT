@@ -83,8 +83,8 @@ def translate_mode_automatic(client, config, args):
     SQLite database. Translations will be written on
     the same DB.
     """
-    limit=int(args.max_limit)
-    count=1
+    limit = int(args.max_limit)
+    count = 1
     translation_tool_name = os.path.basename(__file__)
     translation_tool_commit = get_current_commit()
     translation_model = config['model']
