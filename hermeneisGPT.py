@@ -12,6 +12,7 @@ import os
 import yaml
 from dotenv import dotenv_values
 from openai import OpenAI
+import tiktoken
 from lib.utils import get_current_commit
 from lib.utils import get_file_sha256
 from lib.utils import get_file_content
@@ -76,6 +77,55 @@ def load_and_parse_config(yaml_config_path):
 
     return config
 
+def calculate_cost_analysis(config, args):
+    """
+    Calculate cost for messages
+    """
+    logger.debug("Starting cost estimation")
+    limit = int(args.max_limit)
+    count = 1
+    total_tokens = 0
+    # cost in $ per 1k tokens as per 22.3.2024
+    # TODO: parametrize the cost functionality so the prices can
+    # be retrieved from OpenAI or through a configuration file
+    input_price =  0.0005
+    output_price =  0.0015
+    try:
+        logger.debug("Initializing the tokenizer")
+        encoding = tiktoken.encoding_for_model(config['model'])
+
+        logger.debug("Connecting to DB: %s", args.sqlite_db)
+        connection, cursor = get_db_connection(args.sqlite_db)
+
+        logger.debug("Retrieving messages for channel: %s", args.channel_name)
+        channel_messages = get_channel_messages(cursor, args.channel_name)
+
+        for message_id, message_text in channel_messages:
+            count = count + 1
+            logger.debug("Processing channel %s message %s (%s bytes)", args.channel_name, message_id, len(message_text))
+            if len(message_text) > 1:
+                logger.debug("Creating query to OpenAI")
+                translate_messages = [{"role":"system", "content": config['system']},
+                                      {"role":"user", "content": config['user']+message_text}]
+                tokens = len(encoding.encode(str(translate_messages)))
+                logger.debug("Tokens for message %s (+prompt): %s", message_id, tokens)
+                total_tokens = total_tokens + tokens
+            if count >= limit:
+                # Translation quota reached
+                logger.debug("Translation limit reached, stopping translation")
+                break
+        logger.debug("Total tokens for %s messages (+prompts): %s", count, total_tokens)
+
+        # The estimated total cost is calculated as the sum of the cost of the input messages
+        # and the cost of the output messages. These prices are per 1000 tokens.
+        estimated_total_cost = ((total_tokens*input_price)/1000)+((total_tokens*output_price)/1000)
+        logger.info("Estimated cost of translating %s messages: $ %.2f", count, estimated_total_cost)
+        connection.commit()
+        connection.close()
+    except KeyboardInterrupt:
+        connection.commit()
+        connection.close()
+        return
 
 def translate_mode_automatic(client, config, args):
     """
